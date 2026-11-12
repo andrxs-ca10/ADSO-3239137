@@ -1,0 +1,281 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Entrega 00–06 · ADSO-3239137</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: informe de seguimiento — encabezado, KPIs, hallazgos, un artículo por proyecto, personas, padrón, método */
+:root{
+  --ground:#F4F5F1; --surface:#FFFFFF; --surface-2:#EDEFE9;
+  --ink:#17201D; --muted:#5F6B65; --faint:#8A948D;
+  --line:#D9DED6; --line-strong:#C3CABF;
+  --accent:#1B6B57; --accent-soft:#DCEAE3;
+  --ok:#2F7A4F; --warn:#9E6D17; --crit:#A8453A;
+  --ok-soft:#DFEDE2; --warn-soft:#F4E9CF; --crit-soft:#F5DFDB;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#111512; --surface:#181D19; --surface-2:#1F2521;
+    --ink:#E6EAE3; --muted:#9BA69D; --faint:#768078;
+    --line:#2A312C; --line-strong:#3A433D;
+    --accent:#56B99B; --accent-soft:#1D2E28;
+    --ok:#68BE8A; --warn:#D9A945; --crit:#DE8177;
+    --ok-soft:#1B2D22; --warn-soft:#2E2818; --crit-soft:#2E1D1B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#111512; --surface:#181D19; --surface-2:#1F2521;
+  --ink:#E6EAE3; --muted:#9BA69D; --faint:#768078;
+  --line:#2A312C; --line-strong:#3A433D;
+  --accent:#56B99B; --accent-soft:#1D2E28;
+  --ok:#68BE8A; --warn:#D9A945; --crit:#DE8177;
+  --ok-soft:#1B2D22; --warn-soft:#2E2818; --crit-soft:#2E1D1B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:40px;padding-block:32px 64px;}
+h1,h2,h3{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0;line-height:1.15;}
+h1{font-size:clamp(28px,5vw,42px);letter-spacing:-0.02em;}
+h2{font-size:clamp(20px,3vw,26px);letter-spacing:-0.01em;}
+h3{font-size:17px;font-weight:500;}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
+.lede{color:var(--muted);max-width:66ch;}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+section{display:flex;flex-direction:column;gap:16px;min-width:0}
+header.page{display:flex;flex-direction:column;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:22px;}
+.head-meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.head-meta b{color:var(--ink);font-weight:600;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);}
+.kpi{background:var(--surface);padding:18px 16px;display:flex;flex-direction:column;gap:4px;}
+.kpi .v{font-family:var(--display);font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi .v small{font-size:18px;color:var(--faint);font-weight:500}
+.kpi .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
+.kpi .sub{font-size:13px;color:var(--muted);}
+.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);}
+.finding{background:var(--surface);padding:18px 18px 20px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.finding p{font-size:15px;color:var(--muted)}
+.finding p b{color:var(--ink)}
+.projects{display:flex;flex-direction:column;gap:24px}
+.proj{border:1px solid var(--line);background:var(--surface);min-width:0}
+.proj > .bar{height:4px;background:var(--accent);}
+.proj > .bar.ok{background:var(--ok)} .proj > .bar.warn{background:var(--warn)} .proj > .bar.crit{background:var(--crit)}
+.proj-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px 20px;padding:18px 20px 14px;border-bottom:1px solid var(--line);}
+.proj-head .id{display:flex;flex-direction:column;gap:4px;min-width:0}
+.proj-head .repo{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.score{display:flex;gap:20px;align-items:baseline;flex-wrap:wrap}
+.score > div{display:flex;flex-direction:column;gap:2px}
+.score .pct{font-family:var(--display);font-size:32px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.score .pct small{font-size:16px;color:var(--faint);font-weight:500}
+.score .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.panel{padding:18px 20px;border-bottom:1px solid var(--line);min-width:0}
+.panel:last-child{border-bottom:0;}
+.panel-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;}
+.strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;}
+.cell{display:flex;flex-direction:column;gap:4px;min-width:0}
+.cell .track{height:34px;background:var(--surface-2);position:relative;overflow:hidden;}
+.cell .fill{position:absolute;left:0;right:0;bottom:0;background:var(--accent);}
+.cell .fill.warn{background:var(--warn)}
+.cell .fill.ok{background:var(--ok)}
+.cell .fill.zero{background:transparent;border-top:2px dashed var(--line-strong);height:0;}
+.cell .sec{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:600}
+.cell .nm{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cell .frac{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cell .frac.full{color:var(--ok);font-weight:600;}
+.cell .frac.none{color:var(--crit);}
+.cell .frac.half{color:var(--warn);}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px 28px}
+.cols > div{min-width:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:600px;}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);text-align:left;font-weight:400;padding:0 10px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+th.r,td.r{text-align:right}
+td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top;}
+td.r{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px}
+.user{font-family:var(--mono);font-size:13px;font-weight:600;}
+.who{display:flex;flex-direction:column;gap:2px}
+.who .n{font-size:13px;color:var(--muted)}
+.plus{color:var(--ok);} .minus{color:var(--crit);}
+.share{display:flex;align-items:center;gap:8px;min-width:120px;}
+.share .t{flex:1;height:6px;background:var(--surface-2);}
+.share .f{height:6px;background:var(--accent);display:block;}
+.share .p{font-family:var(--mono);font-size:12px;width:44px;text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:2px;white-space:nowrap;}
+.tag.warn{background:var(--warn-soft);color:var(--warn);}
+.tag.crit{background:var(--crit-soft);color:var(--crit);}
+.tag.ok{background:var(--ok-soft);color:var(--ok);}
+.tag.flat{background:var(--surface-2);color:var(--muted);}
+.notes{display:flex;flex-direction:column;gap:10px;}
+.note{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.5;}
+.note .dot{width:3px;align-self:stretch;flex:none;background:var(--line-strong);}
+.note.risk .dot{background:var(--crit);}
+.note.watch .dot{background:var(--warn);}
+.note.good .dot{background:var(--ok);}
+ul.pend{margin:0;padding-left:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px;}
+ul.pend li{font-family:var(--mono);font-size:11px;padding:3px 7px;background:var(--surface-2);color:var(--muted);overflow-wrap:anywhere}
+ul.pend li b{color:var(--ink);font-weight:600}
+.empty{font-size:14px;color:var(--faint)}
+.roster{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.roster div{background:var(--surface);padding:10px 14px;font-size:14px;display:flex;justify-content:space-between;gap:10px}
+.roster .doc{font-family:var(--mono);font-size:12px;color:var(--faint)}
+footer{border-top:1px solid var(--line);padding-top:18px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:8px;max-width:80ch}
+footer code{font-family:var(--mono);font-size:12px}
+@media (max-width:560px){ .strip{grid-template-columns:repeat(4,minmax(0,1fr))} }
+</style>
+</head><body>
+
+<div class="wrap" id="app"></div>
+<script id="datos" type="application/json">{"corte": "2026-10-15 23:59", "generado": "2026-10-15 21:32", "totales": {"repos": 6, "commits_efectivos": 225, "prs": 97, "contribuyentes": 19}, "nombres_sec": {"00": "Gobernanza", "01": "Contexto", "02": "Dominio", "03": "Producto", "04": "Requisitos", "05": "Arquitectura", "06": "Datos"}, "proyectos": [{"repo": "bourgelat-docs", "proyecto": "bourgelat", "secciones_entregadas": 7, "total_secciones": 7, "faltan": [], "commits": 58, "prs": 48, "contribuyentes": 5, "mayor_aporte_pct": 34.5, "placeholders": 66, "completas": 3, "marcadores": 66, "prs_merged": 38, "prs_open": 8, "secciones": {"00": {"estado": "a medias", "trabajados": 10, "pendientes": [], "ph": 27}, "01": {"estado": "completa", "trabajados": 4, "pendientes": [], "ph": 0}, "02": {"estado": "completa", "trabajados": 4, "pendientes": [], "ph": 0}, "03": {"estado": "completa", "trabajados": 3, "pendientes": [], "ph": 0}, "04": {"estado": "a medias", "trabajados": 4, "pendientes": [], "ph": 4}, "05": {"estado": "a medias", "trabajados": 7, "pendientes": [], "ph": 34}, "06": {"estado": "a medias", "trabajados": 4, "pendientes": [], "ph": 1}}}, {"repo": "friend-point-docs", "proyecto": "service-marketplace-platform", "secciones_entregadas": 7, "total_secciones": 7, "faltan": [], "commits": 8, "prs": 6, "contribuyentes": 5, "mayor_aporte_pct": 50.0, "placeholders": 178, "completas": 1, "marcadores": 151, "prs_merged": 6, "prs_open": 0, "secciones": {"00": {"estado": "a medias", "trabajados": 9, "pendientes": [], "ph": 24}, "01": {"estado": "a medias", "trabajados": 4, "pendientes": [], "ph": 19}, "02": {"estado": "a medias", "trabajados": 4, "pendientes": [], "ph": 54}, "03": {"estado": "a medias", "trabajados": 3, "pendientes": [], "ph": 28}, "04": {"estado": "a medias", "trabajados": 5, "pendientes": [], "ph": 2}, "05": {"estado": "a medias", "trabajados": 8, "pendientes": [], "ph": 24}, "06": {"estado": "completa", "trabajados": 2, "pendientes": [], "ph": 0}}}, {"repo": "g-cod-docs", "proyecto": "sistema-de-gestion-de-citas-odontologicas", "secciones_entregadas": 7, "total_secciones": 7, "faltan": [], "commits": 41, "prs": 4, "contribuyentes": 6, "mayor_aporte_pct": 43.9, "placeholders": 21, "completas": 2, "marcadores": 16, "prs_merged": 4, "prs_open": 0, "secciones": {"00": {"estado": "a medias", "trabajados": 9, "pendientes": [], "ph": 11}, "01": {"estado": "completa", "trabajados": 4, "pendientes": [], "ph": 0}, "02": {"estado": "a medias", "trabajados": 3, "pendientes": ["02-domain/README.md"], "ph": 3}, "03": {"estado": "a medias", "trabajados": 3, "pendientes": [], "ph": 2}, "04": {"estado": "a medias", "trabajados": 3, "pendientes": ["04-requirements/README.md"], "ph": 0}, "05": {"estado": "a medias", "trabajados": 12, "pendientes": ["05-architecture/decisions/records/ADR-001-idioma-documentacion.md"], "ph": 0}, "06": {"estado": "completa", "trabajados": 7, "pendientes": [], "ph": 0}}}, {"repo": "gestion-de-cultivos-docs", "proyecto": "gestion-de-cultivos", "secciones_entregadas": 7, "total_secciones": 7, "faltan": [], "commits": 93, "prs": 39, "contribuyentes": 19, "mayor_aporte_pct": 17.2, "placeholders": 37, "completas": 0, "marcadores": 37, "prs_merged": 24, "prs_open": 0, "secciones": {"00": {"estado": "a medias", "trabajados": 12, "pendientes": [], "ph": 25}, "01": {"estado": "a medias", "trabajados": 3, "pendientes": ["01-context/README.md"], "ph": 0}, "02": {"estado": "a medias", "trabajados": 3, "pendientes": ["02-domain/README.md"], "ph": 3}, "03": {"estado": "a medias", "trabajados": 2, "pendientes": ["03-product/README.md"], "ph": 0}, "04": {"estado": "a medias", "trabajados": 3, "pendientes": ["04-requirements/README.md"], "ph": 0}, "05": {"estado": "a medias", "trabajados": 5, "pendientes": ["05-architecture/README.md", "05-architecture/pattern-guide.md"], "ph": 5}, "06": {"estado": "a medias", "trabajados": 2, "pendientes": ["06-data/README.md"], "ph": 4}}}, {"repo": "stokio-docs", "proyecto": "inventory-finance-stokio", "secciones_entregadas": 6, "total_secciones": 7, "faltan": ["00"], "commits": 25, "prs": 0, "contribuyentes": 1, "mayor_aporte_pct": 100.0, "placeholders": 0, "completas": 2, "marcadores": 0, "prs_merged": 0, "prs_open": 0, "secciones": {"00": {"estado": "falta", "trabajados": 0, "pendientes": ["00-governance/README.md", "00-governance/agile-conventions.md", "00-governance/definition-of-done.md", "00-governance/definition-of-ready.md", "00-governance/documentation-rules.md", "00-governance/git-conventions.md", "00-governance/microservices-documentation.md", "00-governance/security-policy.md", "00-governance/security-rules.md"], "ph": 0}, "01": {"estado": "a medias", "trabajados": 3, "pendientes": ["01-context/README.md"], "ph": 0}, "02": {"estado": "a medias", "trabajados": 3, "pendientes": ["02-domain/README.md"], "ph": 0}, "03": {"estado": "a medias", "trabajados": 2, "pendientes": ["03-product/README.md"], "ph": 0}, "04": {"estado": "a medias", "trabajados": 3, "pendientes": ["04-requirements/README.md"], "ph": 0}, "05": {"estado": "completa", "trabajados": 11, "pendientes": [], "ph": 0}, "06": {"estado": "completa", "trabajados": 2, "pendientes": [], "ph": 0}}}, {"repo": "mantenix-docs", "proyecto": "mantenix", "secciones_entregadas": 0, "total_secciones": 7, "faltan": ["00", "01", "02", "03", "04", "05", "06"], "commits": 0, "prs": 0, "contribuyentes": 0, "mayor_aporte_pct": 0.0, "placeholders": 0, "completas": 0, "marcadores": 0, "prs_merged": 0, "prs_open": 0, "secciones": {"00": {"estado": "falta", "trabajados": 0, "pendientes": ["00-governance/README.md", "00-governance/agile-conventions.md", "00-governance/definition-of-done.md", "00-governance/definition-of-ready.md", "00-governance/documentation-rules.md", "00-governance/git-conventions.md", "00-governance/microservices-documentation.md", "00-governance/security-policy.md", "00-governance/security-rules.md"], "ph": 0}, "01": {"estado": "falta", "trabajados": 0, "pendientes": ["01-context/README.md", "01-context/glossary.md", "01-context/overview.md", "01-context/scope.md"], "ph": 0}, "02": {"estado": "falta", "trabajados": 0, "pendientes": ["02-domain/README.md", "02-domain/domain-events.md", "02-domain/domain-map.md", "02-domain/entities-and-rules.md"], "ph": 0}, "03": {"estado": "falta", "trabajados": 0, "pendientes": ["03-product/README.md", "03-product/problem-framing.md", "03-product/vision.md"], "ph": 0}, "04": {"estado": "falta", "trabajados": 0, "pendientes": ["04-requirements/README.md", "04-requirements/non-functional.md", "04-requirements/traceability-matrix.md", "04-requirements/user-stories.md"], "ph": 0}, "05": {"estado": "falta", "trabajados": 0, "pendientes": ["05-architecture/README.md", "05-architecture/decisions/README.md", "05-architecture/decisions/records/ADR-001-idioma-documentacion.md", "05-architecture/hexagonal-architecture.md", "05-architecture/overview.md", "05-architecture/pattern-guide.md"], "ph": 0}, "06": {"estado": "falta", "trabajados": 0, "pendientes": ["06-data/README.md", "06-data/models.md"], "ph": 0}}}], "personas": [{"login": "romanlabs", "cuentas": ["romanlabs"], "nombre": "ROMAN ALBERTO BOLAÑOS CERQUERA", "proyecto_repo": "bourgelat-docs", "proyecto": "bourgelat", "subteam": [], "coincide_subteam": null, "commits": 25, "prs": 19, "add": 3468, "del": 1545, "arch_reales": 21, "secciones": ["00", "01", "02", "03", "04", "05"], "dias": 2, "por_repo": {"bourgelat-docs": {"commits": 20, "arch_reales": 21, "prs": 18, "add": 2590, "del": 1376}, "gestion-de-cultivos-docs": {"commits": 5, "arch_reales": 0, "prs": 1, "add": 878, "del": 169}}}, {"login": "juanfelipe1216", "cuentas": ["juanfelipe1216"], "nombre": "JUAN FELIPE CORTES QUINTERO", "proyecto_repo": "bourgelat-docs", "proyecto": "bourgelat", "subteam": [], "coincide_subteam": null, "commits": 18, "prs": 13, "add": 2459, "del": 1078, "arch_reales": 10, "secciones": ["00", "02", "03", "05"], "dias": 3, "por_repo": {"bourgelat-docs": {"commits": 14, "arch_reales": 10, "prs": 11, "add": 1183, "del": 636}, "gestion-de-cultivos-docs": {"commits": 4, "arch_reales": 0, "prs": 2, "add": 1276, "del": 442}}}, {"login": "sin-cuenta:sergio-vargas", "cuentas": ["sin-cuenta:sergio-vargas"], "nombre": "SERGIO DAVID VARGAS TRUJILLO", "proyecto_repo": "bourgelat-docs", "proyecto": "bourgelat", "subteam": [], "coincide_subteam": null, "commits": 18, "prs": 0, "add": 2167, "del": 1392, "arch_reales": 8, "secciones": ["02", "03", "04", "05", "06"], "dias": 3, "por_repo": {"bourgelat-docs": {"commits": 13, "arch_reales": 8, "prs": 0, "add": 1601, "del": 716}, "gestion-de-cultivos-docs": {"commits": 5, "arch_reales": 0, "prs": 0, "add": 566, "del": 676}}}, {"login": "StivenFerreira09", "cuentas": ["StivenFerreira09"], "nombre": "STIVEN FERREIRA ESPINOSA", "proyecto_repo": "bourgelat-docs", "proyecto": "bourgelat", "subteam": ["bourgelat"], "coincide_subteam": true, "commits": 12, "prs": 5, "add": 1998, "del": 635, "arch_reales": 6, "secciones": ["00", "01", "05"], "dias": 7, "por_repo": {"bourgelat-docs": {"commits": 8, "arch_reales": 6, "prs": 3, "add": 1067, "del": 427}, "gestion-de-cultivos-docs": {"commits": 4, "arch_reales": 0, "prs": 2, "add": 931, "del": 208}}}, {"login": "Rosas000", "cuentas": ["Rosas000"], "nombre": "ELMER JULIAN ROSAS MANJARRES", "proyecto_repo": "bourgelat-docs", "proyecto": "bourgelat", "subteam": [], "coincide_subteam": null, "commits": 6, "prs": 5, "add": 2304, "del": 756, "arch_reales": 6, "secciones": ["01", "02", "06"], "dias": 4, "por_repo": {"bourgelat-docs": {"commits": 3, "arch_reales": 3, "prs": 2, "add": 912, "del": 275}, "gestion-de-cultivos-docs": {"commits": 3, "arch_reales": 3, "prs": 3, "add": 1392, "del": 481}}}, {"login": "Aguirrecristiantrox0426", "cuentas": ["Aguirrecristiantrox0426"], "nombre": "CRISTIAN CAMILO AGUIRRE PERDOMO", "proyecto_repo": "friend-point-docs", "proyecto": "service-marketplace-platform", "subteam": ["service-marketplace-platform"], "coincide_subteam": true, "commits": 8, "prs": 5, "add": 12531, "del": 2764, "arch_reales": 27, "secciones": ["00", "01", "02", "03", "04", "05", "06"], "dias": 4, "por_repo": {"friend-point-docs": {"commits": 4, "arch_reales": 27, "prs": 3, "add": 8245, "del": 1826}, "gestion-de-cultivos-docs": {"commits": 4, "arch_reales": 0, "prs": 2, "add": 4286, "del": 938}}}, {"login": "Chaux123", "cuentas": ["Chaux123"], "nombre": "JUAN DAVID CHAUX CANTILLO", "proyecto_repo": "friend-point-docs", "proyecto": "service-marketplace-platform", "subteam": [], "coincide_subteam": null, "commits": 7, "prs": 4, "add": 1866, "del": 1148, "arch_reales": 5, "secciones": ["04"], "dias": 4, "por_repo": {"friend-point-docs": {"commits": 1, "arch_reales": 5, "prs": 1, "add": 39, "del": 74}, "gestion-de-cultivos-docs": {"commits": 6, "arch_reales": 0, "prs": 3, "add": 1827, "del": 1074}}}, {"login": "sin-cuenta:jeison-duenas", "cuentas": ["sin-cuenta:jeison-duenas"], "nombre": "JEISON CAMILO DUEÑAS LOZANO", "proyecto_repo": "friend-point-docs", "proyecto": "service-marketplace-platform", "subteam": [], "coincide_subteam": null, "commits": 5, "prs": 0, "add": 1688, "del": 425, "arch_reales": 5, "secciones": ["02", "03"], "dias": 3, "por_repo": {"friend-point-docs": {"commits": 1, "arch_reales": 5, "prs": 0, "add": 27, "del": 193}, "gestion-de-cultivos-docs": {"commits": 4, "arch_reales": 0, "prs": 0, "add": 1661, "del": 232}}}, {"login": "fierroestiven6-cell", "cuentas": ["fierroestiven6-cell"], "nombre": "JORGE STEVEN GUTIERREZ FIERRO", "proyecto_repo": "g-cod-docs", "proyecto": "sistema-de-gestion-de-citas-odontologicas", "subteam": [], "coincide_subteam": null, "commits": 5, "prs": 2, "add": 7630, "del": 2099, "arch_reales": 18, "secciones": ["03", "05", "06"], "dias": 4, "por_repo": {"g-cod-docs": {"commits": 3, "arch_reales": 16, "prs": 1, "add": 7306, "del": 1964}, "gestion-de-cultivos-docs": {"commits": 2, "arch_reales": 2, "prs": 1, "add": 324, "del": 135}}}, {"login": "luisbuitrago-hub", "cuentas": ["luisbuitrago-hub"], "nombre": "LUIS EDUARDO BUITRAGO PASCUAS", "proyecto_repo": "g-cod-docs", "proyecto": "sistema-de-gestion-de-citas-odontologicas", "subteam": ["sistema-de-gestion-de-citas-odontologicas"], "coincide_subteam": true, "commits": 21, "prs": 1, "add": 2139, "del": 876, "arch_reales": 9, "secciones": ["00"], "dias": 4, "por_repo": {"g-cod-docs": {"commits": 18, "arch_reales": 9, "prs": 0, "add": 1206, "del": 683}, "gestion-de-cultivos-docs": {"commits": 3, "arch_reales": 0, "prs": 1, "add": 933, "del": 193}}}, {"login": "ana-martinez777", "cuentas": ["ana-martinez777", "ana150998martinez-wq"], "nombre": "ANA MARIA MARTINEZ CASTILLO", "proyecto_repo": "g-cod-docs", "proyecto": "sistema-de-gestion-de-citas-odontologicas", "subteam": [], "coincide_subteam": null, "commits": 16, "prs": 5, "add": 3407, "del": 825, "arch_reales": 9, "secciones": ["01", "03", "06"], "dias": 5, "por_repo": {"g-cod-docs": {"commits": 8, "arch_reales": 7, "prs": 2, "add": 415, "del": 366}, "gestion-de-cultivos-docs": {"commits": 8, "arch_reales": 2, "prs": 3, "add": 2992, "del": 459}}}, {"login": "daniela0405-laura", "cuentas": ["daniela0405-laura"], "nombre": "LAURA DANIELA AVILES PERDOMO", "proyecto_repo": "g-cod-docs", "proyecto": "sistema-de-gestion-de-citas-odontologicas", "subteam": [], "coincide_subteam": null, "commits": 7, "prs": 1, "add": 5963, "del": 709, "arch_reales": 6, "secciones": ["02", "04"], "dias": 3, "por_repo": {"g-cod-docs": {"commits": 4, "arch_reales": 3, "prs": 0, "add": 2832, "del": 419}, "gestion-de-cultivos-docs": {"commits": 3, "arch_reales": 3, "prs": 1, "add": 3131, "del": 290}}}, {"login": "andrxs-ca10", "cuentas": ["andrxs-ca10"], "nombre": "ANDRES CAMILO PEREZ MENDOZA", "proyecto_repo": "g-cod-docs", "proyecto": "sistema-de-gestion-de-citas-odontologicas", "subteam": [], "coincide_subteam": null, "commits": 24, "prs": 2, "add": 6465, "del": 1759, "arch_reales": 3, "secciones": ["04"], "dias": 2, "por_repo": {"g-cod-docs": {"commits": 8, "arch_reales": 3, "prs": 1, "add": 2072, "del": 1748}, "gestion-de-cultivos-docs": {"commits": 16, "arch_reales": 0, "prs": 1, "add": 4393, "del": 11}}}, {"login": "JohanOtavo", "cuentas": ["JohanOtavo"], "nombre": "JANNIER JOHAN OTAVO ARTUNDUAGA", "proyecto_repo": "gestion-de-cultivos-docs", "proyecto": "gestion-de-cultivos", "subteam": ["gestion-de-cultivos"], "coincide_subteam": true, "commits": 15, "prs": 6, "add": 3744, "del": 1479, "arch_reales": 18, "secciones": ["00", "01", "05", "06"], "dias": 8, "por_repo": {"friend-point-docs": {"commits": 1, "arch_reales": 2, "prs": 1, "add": 48, "del": 46}, "gestion-de-cultivos-docs": {"commits": 14, "arch_reales": 16, "prs": 5, "add": 3696, "del": 1433}}}, {"login": "ivanandrescortesolaya-spec", "cuentas": ["ivanandrescortesolaya-spec"], "nombre": "IVAN ANDRES CORTES OLAYA", "proyecto_repo": "gestion-de-cultivos-docs", "proyecto": "gestion-de-cultivos", "subteam": [], "coincide_subteam": null, "commits": 5, "prs": 5, "add": 1927, "del": 740, "arch_reales": 10, "secciones": ["01", "02", "05"], "dias": 3, "por_repo": {"friend-point-docs": {"commits": 1, "arch_reales": 4, "prs": 0, "add": 121, "del": 37}, "gestion-de-cultivos-docs": {"commits": 4, "arch_reales": 6, "prs": 5, "add": 1806, "del": 703}}}, {"login": "chaarlyez", "cuentas": ["chaarlyez"], "nombre": "CARLOS FERNANDO BETANCOURT LOPEZ", "proyecto_repo": "stokio-docs", "proyecto": "inventory-finance-stokio", "subteam": ["inventory-finance-stokio"], "coincide_subteam": true, "commits": 29, "prs": 2, "add": 8036, "del": 4979, "arch_reales": 28, "secciones": ["01", "02", "03", "04", "05", "06"], "dias": 3, "por_repo": {"gestion-de-cultivos-docs": {"commits": 4, "arch_reales": 4, "prs": 2, "add": 816, "del": 446}, "stokio-docs": {"commits": 25, "arch_reales": 24, "prs": 0, "add": 7220, "del": 4533}}}, {"login": "Johann-Tafur", "cuentas": ["Johann-Tafur"], "nombre": "JOHANN TAFUR FARFAN", "proyecto_repo": "", "proyecto": "", "subteam": ["mantenix"], "coincide_subteam": false, "commits": 3, "prs": 1, "add": 454, "del": 358, "arch_reales": 0, "secciones": [], "dias": 1, "por_repo": {"gestion-de-cultivos-docs": {"commits": 3, "arch_reales": 0, "prs": 1, "add": 454, "del": 358}}}, {"login": "CarlosMarioCardona97", "cuentas": ["CarlosMarioCardona97"], "nombre": "CARLOS MARIO CARDONA VALDERRAMA", "proyecto_repo": "", "proyecto": "", "subteam": ["mantenix"], "coincide_subteam": false, "commits": 1, "prs": 1, "add": 147, "del": 258, "arch_reales": 0, "secciones": [], "dias": 1, "por_repo": {"gestion-de-cultivos-docs": {"commits": 1, "arch_reales": 0, "prs": 1, "add": 147, "del": 258}}}], "aporte": [{"repo": "bourgelat-docs", "login": "romanlabs", "nombre": "ROMAN ALBERTO BOLAÑOS CERQUERA", "es_su_proyecto": "si", "commits": 20, "pct_commits": 34.5, "arch_reales": 21, "pct_arch_reales": 43.8, "prs": 18, "add": 2590, "del": 1376}, {"repo": "bourgelat-docs", "login": "juanfelipe1216", "nombre": "JUAN FELIPE CORTES QUINTERO", "es_su_proyecto": "si", "commits": 14, "pct_commits": 24.1, "arch_reales": 10, "pct_arch_reales": 20.8, "prs": 11, "add": 1183, "del": 636}, {"repo": "bourgelat-docs", "login": "sin-cuenta:sergio-vargas", "nombre": "SERGIO DAVID VARGAS TRUJILLO", "es_su_proyecto": "si", "commits": 13, "pct_commits": 22.4, "arch_reales": 8, "pct_arch_reales": 16.7, "prs": 0, "add": 1601, "del": 716}, {"repo": "bourgelat-docs", "login": "StivenFerreira09", "nombre": "STIVEN FERREIRA ESPINOSA", "es_su_proyecto": "si", "commits": 8, "pct_commits": 13.8, "arch_reales": 6, "pct_arch_reales": 12.5, "prs": 3, "add": 1067, "del": 427}, {"repo": "bourgelat-docs", "login": "Rosas000", "nombre": "ELMER JULIAN ROSAS MANJARRES", "es_su_proyecto": "si", "commits": 3, "pct_commits": 5.2, "arch_reales": 3, "pct_arch_reales": 6.2, "prs": 2, "add": 912, "del": 275}, {"repo": "friend-point-docs", "login": "Aguirrecristiantrox0426", "nombre": "CRISTIAN CAMILO AGUIRRE PERDOMO", "es_su_proyecto": "si", "commits": 4, "pct_commits": 50.0, "arch_reales": 27, "pct_arch_reales": 62.8, "prs": 3, "add": 8245, "del": 1826}, {"repo": "friend-point-docs", "login": "Chaux123", "nombre": "JUAN DAVID CHAUX CANTILLO", "es_su_proyecto": "si", "commits": 1, "pct_commits": 12.5, "arch_reales": 5, "pct_arch_reales": 11.6, "prs": 1, "add": 39, "del": 74}, {"repo": "friend-point-docs", "login": "sin-cuenta:jeison-duenas", "nombre": "JEISON CAMILO DUEÑAS LOZANO", "es_su_proyecto": "si", "commits": 1, "pct_commits": 12.5, "arch_reales": 5, "pct_arch_reales": 11.6, "prs": 0, "add": 27, "del": 193}, {"repo": "friend-point-docs", "login": "ivanandrescortesolaya-spec", "nombre": "IVAN ANDRES CORTES OLAYA", "es_su_proyecto": "no", "commits": 1, "pct_commits": 12.5, "arch_reales": 4, "pct_arch_reales": 9.3, "prs": 0, "add": 121, "del": 37}, {"repo": "friend-point-docs", "login": "JohanOtavo", "nombre": "JANNIER JOHAN OTAVO ARTUNDUAGA", "es_su_proyecto": "no", "commits": 1, "pct_commits": 12.5, "arch_reales": 2, "pct_arch_reales": 4.7, "prs": 1, "add": 48, "del": 46}, {"repo": "g-cod-docs", "login": "fierroestiven6-cell", "nombre": "JORGE STEVEN GUTIERREZ FIERRO", "es_su_proyecto": "si", "commits": 3, "pct_commits": 7.3, "arch_reales": 16, "pct_arch_reales": 42.1, "prs": 1, "add": 7306, "del": 1964}, {"repo": "g-cod-docs", "login": "luisbuitrago-hub", "nombre": "LUIS EDUARDO BUITRAGO PASCUAS", "es_su_proyecto": "si", "commits": 18, "pct_commits": 43.9, "arch_reales": 9, "pct_arch_reales": 23.7, "prs": 0, "add": 1206, "del": 683}, {"repo": "g-cod-docs", "login": "ana-martinez777", "nombre": "ANA MARIA MARTINEZ CASTILLO", "es_su_proyecto": "si", "commits": 8, "pct_commits": 19.5, "arch_reales": 7, "pct_arch_reales": 18.4, "prs": 2, "add": 415, "del": 366}, {"repo": "g-cod-docs", "login": "andrxs-ca10", "nombre": "ANDRES CAMILO PEREZ MENDOZA", "es_su_proyecto": "si", "commits": 8, "pct_commits": 19.5, "arch_reales": 3, "pct_arch_reales": 7.9, "prs": 1, "add": 2072, "del": 1748}, {"repo": "g-cod-docs", "login": "daniela0405-laura", "nombre": "LAURA DANIELA AVILES PERDOMO", "es_su_proyecto": "si", "commits": 4, "pct_commits": 9.8, "arch_reales": 3, "pct_arch_reales": 7.9, "prs": 0, "add": 2832, "del": 419}, {"repo": "gestion-de-cultivos-docs", "login": "JohanOtavo", "nombre": "JANNIER JOHAN OTAVO ARTUNDUAGA", "es_su_proyecto": "si", "commits": 14, "pct_commits": 15.1, "arch_reales": 16, "pct_arch_reales": 44.4, "prs": 5, "add": 3696, "del": 1433}, {"repo": "gestion-de-cultivos-docs", "login": "ivanandrescortesolaya-spec", "nombre": "IVAN ANDRES CORTES OLAYA", "es_su_proyecto": "si", "commits": 4, "pct_commits": 4.3, "arch_reales": 6, "pct_arch_reales": 16.7, "prs": 5, "add": 1806, "del": 703}, {"repo": "gestion-de-cultivos-docs", "login": "chaarlyez", "nombre": "CARLOS FERNANDO BETANCOURT LOPEZ", "es_su_proyecto": "no", "commits": 4, "pct_commits": 4.3, "arch_reales": 4, "pct_arch_reales": 11.1, "prs": 2, "add": 816, "del": 446}, {"repo": "gestion-de-cultivos-docs", "login": "Rosas000", "nombre": "ELMER JULIAN ROSAS MANJARRES", "es_su_proyecto": "no", "commits": 3, "pct_commits": 3.2, "arch_reales": 3, "pct_arch_reales": 8.3, "prs": 3, "add": 1392, "del": 481}, {"repo": "gestion-de-cultivos-docs", "login": "daniela0405-laura", "nombre": "LAURA DANIELA AVILES PERDOMO", "es_su_proyecto": "no", "commits": 3, "pct_commits": 3.2, "arch_reales": 3, "pct_arch_reales": 8.3, "prs": 1, "add": 3131, "del": 290}, {"repo": "gestion-de-cultivos-docs", "login": "ana-martinez777", "nombre": "ANA MARIA MARTINEZ CASTILLO", "es_su_proyecto": "no", "commits": 8, "pct_commits": 8.6, "arch_reales": 2, "pct_arch_reales": 5.6, "prs": 3, "add": 2992, "del": 459}, {"repo": "gestion-de-cultivos-docs", "login": "fierroestiven6-cell", "nombre": "JORGE STEVEN GUTIERREZ FIERRO", "es_su_proyecto": "no", "commits": 2, "pct_commits": 2.2, "arch_reales": 2, "pct_arch_reales": 5.6, "prs": 1, "add": 324, "del": 135}, {"repo": "gestion-de-cultivos-docs", "login": "andrxs-ca10", "nombre": "ANDRES CAMILO PEREZ MENDOZA", "es_su_proyecto": "no", "commits": 16, "pct_commits": 17.2, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 1, "add": 4393, "del": 11}, {"repo": "gestion-de-cultivos-docs", "login": "Chaux123", "nombre": "JUAN DAVID CHAUX CANTILLO", "es_su_proyecto": "no", "commits": 6, "pct_commits": 6.5, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 3, "add": 1827, "del": 1074}, {"repo": "gestion-de-cultivos-docs", "login": "romanlabs", "nombre": "ROMAN ALBERTO BOLAÑOS CERQUERA", "es_su_proyecto": "no", "commits": 5, "pct_commits": 5.4, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 1, "add": 878, "del": 169}, {"repo": "gestion-de-cultivos-docs", "login": "sin-cuenta:sergio-vargas", "nombre": "SERGIO DAVID VARGAS TRUJILLO", "es_su_proyecto": "no", "commits": 5, "pct_commits": 5.4, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 0, "add": 566, "del": 676}, {"repo": "gestion-de-cultivos-docs", "login": "juanfelipe1216", "nombre": "JUAN FELIPE CORTES QUINTERO", "es_su_proyecto": "no", "commits": 4, "pct_commits": 4.3, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 2, "add": 1276, "del": 442}, {"repo": "gestion-de-cultivos-docs", "login": "StivenFerreira09", "nombre": "STIVEN FERREIRA ESPINOSA", "es_su_proyecto": "no", "commits": 4, "pct_commits": 4.3, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 2, "add": 931, "del": 208}, {"repo": "gestion-de-cultivos-docs", "login": "Aguirrecristiantrox0426", "nombre": "CRISTIAN CAMILO AGUIRRE PERDOMO", "es_su_proyecto": "no", "commits": 4, "pct_commits": 4.3, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 2, "add": 4286, "del": 938}, {"repo": "gestion-de-cultivos-docs", "login": "sin-cuenta:jeison-duenas", "nombre": "JEISON CAMILO DUEÑAS LOZANO", "es_su_proyecto": "no", "commits": 4, "pct_commits": 4.3, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 0, "add": 1661, "del": 232}, {"repo": "gestion-de-cultivos-docs", "login": "luisbuitrago-hub", "nombre": "LUIS EDUARDO BUITRAGO PASCUAS", "es_su_proyecto": "no", "commits": 3, "pct_commits": 3.2, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 1, "add": 933, "del": 193}, {"repo": "gestion-de-cultivos-docs", "login": "Johann-Tafur", "nombre": "JOHANN TAFUR FARFAN", "es_su_proyecto": "no", "commits": 3, "pct_commits": 3.2, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 1, "add": 454, "del": 358}, {"repo": "gestion-de-cultivos-docs", "login": "CarlosMarioCardona97", "nombre": "CARLOS MARIO CARDONA VALDERRAMA", "es_su_proyecto": "no", "commits": 1, "pct_commits": 1.1, "arch_reales": 0, "pct_arch_reales": 0.0, "prs": 1, "add": 147, "del": 258}, {"repo": "stokio-docs", "login": "chaarlyez", "nombre": "CARLOS FERNANDO BETANCOURT LOPEZ", "es_su_proyecto": "si", "commits": 25, "pct_commits": 100.0, "arch_reales": 24, "pct_arch_reales": 100.0, "prs": 0, "add": 7220, "del": 4533}], "padron": {"total": 28, "con_aporte": 18, "sin_aporte": ["CHELSEA PERDOMO GARCIA", "JUAN ANDRES CAMACHO FARFAN", "DARWIN FERNEY ZAMUDIO MELO", "JUAN ESTEBAN ZULUAGA GARZON", "JEFERZON ANDRES OSSA ALCALA", "ANDRES FELIPE FACUNDO ADAMEZ", "OSCAR JAVELA TELLO", "ROBINSON GARCIA ALARCON", "LORENA ECHEVERRY MONTENEGRO", "LUIS ALFONSO JOVEN AMEZQUITA"], "fuera_del_padron": ["ana150998martinez-wq"], "por_confirmar": []}}</script>
+<script>
+(function(){
+const D = JSON.parse(document.getElementById('datos').textContent);
+const SECS = ["00","01","02","03","04","05","06"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => Number(n).toLocaleString("es-CO");
+const title = s => String(s||"").toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase());
+const P = D.proyectos;
+const personas = D.personas;
+const porLogin = Object.fromEntries(personas.map(p => [p.login, p]));
+const NOMBRE_PROY = {
+  "bourgelat":"Bourgelat","service-marketplace-platform":"Friend Point · marketplace de servicios",
+  "sistema-de-gestion-de-citas-odontologicas":"G-COD · citas odontológicas","gestion-de-cultivos":"Gestión de cultivos",
+  "inventory-finance-stokio":"Stokio · inventario y finanzas","mantenix":"Mantenix"};
+const nomProy = p => NOMBRE_PROY[p] || p;
+const nomRepo = r => { const x = P.find(p => p.repo === r); return x ? nomProy(x.proyecto) : r; };
+const totalCompletas = P.reduce((a,p)=>a+p.completas,0);
+const totalMarc = P.reduce((a,p)=>a+p.marcadores,0);
+const con7 = P.filter(p=>p.secciones_entregadas===7).length;
+const pad = D.padron;
+
+let h = "";
+h += `<header class="page">
+  <span class="eyebrow">Ficha ADSO-3239137 · code-sena · informe de seguimiento</span>
+  <h1>Entrega de las secciones 00 a 06</h1>
+  <p class="lede">Avance de los ${P.length} repos de documentación de la ficha contra el framework de gobernanza, y aporte de cada aprendiz. Descuenta la siembra del framework y lo que sigue igual a la plantilla.</p>
+  <div class="head-meta"><span>Corte <b>${esc(D.corte)} (−05:00)</b></span><span>Generado <b>${esc(D.generado)}</b></span><span>Padrón <b>Sofía Plus, 15/10/2026</b></span><span>Ramas <b>todas</b></span></div>
+</header>`;
+
+h += `<section aria-label="Totales"><div class="kpis">
+  <div class="kpi"><span class="k">Proyectos con 7/7 entregadas</span><span class="v">${con7}<small>/${P.length}</small></span><span class="sub">al menos un archivo propio en cada sección</span></div>
+  <div class="kpi"><span class="k">Secciones completas</span><span class="v">${totalCompletas}<small>/${P.length*7}</small></span><span class="sub">sin pendientes ni marcadores</span></div>
+  <div class="kpi"><span class="k">Marcadores [Texto]</span><span class="v">${fmt(totalMarc)}</span><span class="sub">sin reemplazar en archivos trabajados</span></div>
+  <div class="kpi"><span class="k">Commits efectivos</span><span class="v">${fmt(D.totales.commits_efectivos)}</span><span class="sub">${fmt(D.totales.prs)} PR en total</span></div>
+  <div class="kpi"><span class="k">Aprendices con aporte</span><span class="v">${pad.con_aporte}<small>/${pad.total}</small></span><span class="sub">${pad.sin_aporte.length} del padrón sin aporte localizado</span></div>
+</div></section>`;
+
+const sinSub = personas.filter(p => p.coincide_subteam === null).length;
+h += `<section><h2>Hallazgos</h2><div class="findings">
+  <div class="finding"><span class="tag crit">Riesgo</span><h3>Mantenix no ha empezado</h3><p><b>0 de 7</b> secciones y ningún commit en <span class="num">mantenix-docs</span>. Sus dos integrantes en GitHub solo hicieron <b>4 commits</b> en Gestión de cultivos, y ninguno dejó un archivo distinto de la plantilla.</p></div>
+  <div class="finding"><span class="tag warn">Vigilar</span><h3>Stokio se hizo en un solo día</h3><p>Los <b>25 commits</b> son de una sola persona, todos del <b>15/10</b>, y no hay ningún PR. Le falta entera la <b>00 Gobernanza</b>: es el único proyecto avanzado que no la ha tocado.</p></div>
+  <div class="finding"><span class="tag warn">Vigilar</span><h3>Volumen sin contenido en Friend Point</h3><p>Tiene 7/7 entregadas, pero quedan <b>151 marcadores [Texto]</b> sin reemplazar (el 56 % de la ficha) y la mitad de los commits son de una persona. Solo la sección 06 está completa.</p></div>
+  <div class="finding"><span class="tag flat">Estructura</span><h3>Gestión de cultivos sirvió de repo compartido</h3><p>Hay commits de <b>18 aprendices</b>, casi todos entre el 21 y el 28/09, pero <b>11</b> no dejaron ningún archivo con trabajo real. No tiene ninguna sección completa: le quedan 7 archivos sin tocar.</p></div>
+  <div class="finding"><span class="tag flat">Estructura</span><h3>Los subteams no reflejan los equipos</h3><p><b>${sinSub} de ${personas.length}</b> personas que aportan no están en ningún subteam, y cada subteam tiene solo 1 o 2 aprendices. El equipo real de cada proyecto sale de los commits.</p></div>
+  <div class="finding"><span class="tag ok">Bien</span><h3>Bourgelat va adelante</h3><p>Es el proyecto con más secciones completas (<b>3/7</b>: 01, 02 y 03) y el que más usa PR (<b>48</b>, 38 fusionados). Lo frenan los 34 marcadores de 05 Arquitectura.</p></div>
+</div></section>`;
+
+// ---- proyectos
+const orden = [...P].sort((a,b)=> b.completas-a.completas || b.secciones_entregadas-a.secciones_entregadas || b.commits-a.commits);
+h += `<section><h2>Estado por proyecto</h2><p class="lede">Sección <b>entregada</b> = al menos un archivo propio. <b>Completa</b> = ningún archivo sigue igual a la plantilla y no quedan marcadores [Texto]. Los <span class="num">_template-*</span> y <span class="num">.gitkeep</span> no cuentan como pendientes.</p><div class="projects">`;
+for (const p of orden){
+  const bar = p.secciones_entregadas===0 ? "crit" : (p.completas>=3 ? "ok" : "warn");
+  let strip = "";
+  const pendientes = [], medias = [], completas = [], faltan = [];
+  for (const s of SECS){
+    const e = p.secciones[s];
+    const tot = e.trabajados + e.pendientes.length;
+    const frac = tot ? e.trabajados / tot : 0;
+    let cls, fillCls, txt;
+    if (e.estado === "completa"){ cls="full"; fillCls="ok"; txt="completa"; completas.push(s); }
+    else if (e.estado === "falta"){ cls="none"; fillCls="zero"; txt="falta"; faltan.push(s); }
+    else { cls="half"; fillCls="warn"; txt = e.ph ? `${e.ph} marc.` : `${e.pendientes.length} pend.`; medias.push(s); }
+    const hgt = fillCls==="zero" ? "" : `style="height:${Math.max(12, Math.round(frac*100))}%"`;
+    strip += `<div class="cell" title="${esc(s+' '+D.nombres_sec[s])}: ${e.trabajados} archivos trabajados, ${e.pendientes.length} pendientes, ${e.ph} marcadores">
+      <div class="track"><span class="fill ${fillCls}" ${hgt}></span></div>
+      <span class="sec">${s}</span><span class="nm">${esc(D.nombres_sec[s])}</span><span class="frac ${cls}">${txt}</span></div>`;
+    for (const f of e.pendientes) pendientes.push(f);
+  }
+  const notas = [];
+  if (completas.length) notas.push(`<div class="note good"><span class="dot"></span><span><b>Completas:</b> ${completas.map(s=>s+" "+D.nombres_sec[s]).join(", ")}.</span></div>`);
+  if (medias.length) notas.push(`<div class="note watch"><span class="dot"></span><span><b>A medias:</b> ${medias.map(s=>{const e=p.secciones[s];const d=[];if(e.ph)d.push(e.ph+" marcadores");if(e.pendientes.length)d.push(e.pendientes.length+" sin tocar");return s+" ("+d.join(", ")+")";}).join(" · ")}.</span></div>`);
+  if (faltan.length) notas.push(`<div class="note risk"><span class="dot"></span><span><b>Faltan:</b> ${faltan.map(s=>s+" "+D.nombres_sec[s]).join(", ")}.</span></div>`);
+  if (p.repo==="g-cod-docs") notas.push(`<div class="note watch"><span class="dot"></span><span>El principal aportante (18 commits) trabajó por push directo: el repo tiene solo 4 PR.</span></div>`);
+  if (p.repo==="bourgelat-docs") notas.push(`<div class="note watch"><span class="dot"></span><span>Hay ${p.prs_open} PR abiertos sin fusionar.</span></div>`);
+
+  const filas = D.aporte.filter(a => a.repo === p.repo);
+  let tabla = "";
+  if (filas.length){
+    tabla = `<div class="tbl"><table><thead><tr><th>Persona</th><th>Su proyecto</th><th class="r">Commits</th><th>Aporte (commits)</th><th class="r">Arch. reales</th><th>Aporte (arch. reales)</th><th class="r">PR</th><th class="r">Líneas</th></tr></thead><tbody>`;
+    for (const a of filas){
+      const per = porLogin[a.login];
+      const casa = a.es_su_proyecto === "si" ? `<span class="tag ok">este</span>` : (per && per.proyecto_repo ? `<span class="tag flat">${esc(nomRepo(per.proyecto_repo))}</span>` : `<span class="tag crit">ninguno</span>`);
+      tabla += `<tr><td><div class="who"><span class="user">${esc(a.login.replace("sin-cuenta:","sin cuenta · "))}</span><span class="n">${esc(title(a.nombre))}</span></div></td>
+        <td>${casa}</td><td class="r">${a.commits}</td>
+        <td><div class="share"><span class="t"><span class="f" style="width:${a.pct_commits}%"></span></span><span class="p">${a.pct_commits}%</span></div></td>
+        <td class="r">${a.arch_reales}</td>
+        <td><div class="share"><span class="t"><span class="f" style="width:${a.pct_arch_reales}%"></span></span><span class="p">${a.pct_arch_reales}%</span></div></td>
+        <td class="r">${a.prs}</td><td class="r"><span class="plus">+${fmt(a.add)}</span> <span class="minus">−${fmt(a.del)}</span></td></tr>`;
+    }
+    tabla += `</tbody></table></div>`;
+  } else tabla = `<p class="empty">Ningún commit después de la siembra del framework.</p>`;
+
+  h += `<article class="proj"><div class="bar ${bar}"></div>
+    <div class="proj-head"><div class="id"><h3 style="font-size:20px;font-weight:700">${esc(nomProy(p.proyecto))}</h3><span class="repo">${esc(p.repo)} · subteam ${esc(p.proyecto)}</span></div>
+      <div class="score"><div><span class="pct">${p.completas}<small>/7</small></span><span class="lbl">completas</span></div>
+      <div><span class="pct">${p.secciones_entregadas}<small>/7</small></span><span class="lbl">entregadas</span></div>
+      <div><span class="pct">${p.marcadores}</span><span class="lbl">marcadores</span></div>
+      <div><span class="pct">${p.commits}</span><span class="lbl">commits · ${p.prs} PR</span></div></div></div>
+    <div class="panel"><div class="panel-title">Secciones 00–06 · altura = archivos trabajados sobre el total</div><div class="strip">${strip}</div></div>
+    <div class="panel"><div class="cols"><div><div class="panel-title">Qué está entregado, a medias y qué falta</div><div class="notes">${notas.join("")}</div></div>
+      <div><div class="panel-title">Archivos que siguen igual a la plantilla</div>${pendientes.length ? `<ul class="pend">${pendientes.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>` : `<p class="empty">Ninguno.</p>`}</div></div></div>
+    <div class="panel"><div class="panel-title">Aporte al proyecto</div>${tabla}</div>
+  </article>`;
+}
+h += `</div><div class="legend"><span><i style="background:var(--ok)"></i>completa</span><span><i style="background:var(--warn)"></i>a medias</span><span><i style="border-top:2px dashed var(--line-strong);height:0;width:10px"></i>falta</span></div></section>`;
+
+// ---- personas
+const ps = [...personas].sort((a,b)=> (nomRepo(a.proyecto_repo)||"~").localeCompare(nomRepo(b.proyecto_repo)||"~") || b.arch_reales-a.arch_reales);
+h += `<section><h2>Aporte por persona</h2><p class="lede">Totales en todos los repos. El proyecto de cada persona es el repo donde dejó más archivos con trabajo real. Las líneas incluyen archivos que después volvieron a quedar como plantilla, así que miden actividad, no avance.</p>
+<div class="tbl"><table><thead><tr><th>Persona</th><th>Proyecto</th><th>Subteam GitHub</th><th class="r">Commits</th><th class="r">PR</th><th class="r">Líneas</th><th class="r">Arch. reales</th><th>Secciones</th><th class="r">Días</th></tr></thead><tbody>`;
+for (const p of ps){
+  let sub;
+  if (p.coincide_subteam === true) sub = `<span class="tag ok">coincide</span>`;
+  else if (p.coincide_subteam === false) sub = `<span class="tag crit">${esc(p.subteam.join(", "))}</span>`;
+  else sub = `<span class="tag flat">sin subteam</span>`;
+  const cuentas = p.cuentas.length > 1 ? `<span class="n">+ ${esc(p.cuentas.slice(1).join(", "))}</span>` : "";
+  h += `<tr><td><div class="who"><span class="user">${esc(p.login.replace("sin-cuenta:","sin cuenta · "))}</span>${cuentas}<span class="n">${esc(title(p.nombre))}</span></div></td>
+    <td>${p.proyecto_repo ? esc(nomRepo(p.proyecto_repo)) : '<span class="tag crit">ninguno</span>'}</td><td>${sub}</td>
+    <td class="r">${p.commits}</td><td class="r">${p.prs}</td><td class="r"><span class="plus">+${fmt(p.add)}</span> <span class="minus">−${fmt(p.del)}</span></td>
+    <td class="r">${p.arch_reales}</td><td class="num" style="font-size:12px">${esc(p.secciones.join(" ")) || "—"}</td><td class="r">${p.dias}</td></tr>`;
+}
+h += `</tbody></table></div>
+<div class="notes">
+  <div class="note risk"><span class="dot"></span><span><b>No coinciden con su subteam:</b> Johann Tafur Farfán y Carlos Mario Cardona Valderrama están en el subteam de Mantenix, pero su único aporte (4 commits) está en Gestión de cultivos, sin archivos con trabajo real.</span></div>
+  <div class="note watch"><span class="dot"></span><span><b>Una sola persona por proyecto:</b> Stokio depende al 100 % de chaarlyez, y en Friend Point Cristian Camilo Aguirre escribió 27 de los 43 archivos con trabajo real.</span></div>
+</div></section>`;
+
+// ---- padrón
+h += `<section><h2>Padrón</h2><p class="lede">${pad.total} aprendices EN FORMACION en el reporte de juicios de Sofía Plus. De ellos, ${pad.con_aporte} tienen aporte localizado.</p>
+<div class="cols"><div><div class="panel-title">Sin aporte localizado (${pad.sin_aporte.length})</div><div class="roster">${pad.sin_aporte.map(n=>`<div><span>${esc(title(n))}</span></div>`).join("")}</div></div>
+<div><div class="panel-title">Cuentas que aportan sin estar en el padrón</div><div class="notes">
+  <div class="note good"><span class="dot"></span><span><b>Ninguna sin identificar.</b> Todas las cuentas con commits corresponden a alguien del padrón.</span></div>
+  <div class="note watch"><span class="dot"></span><span><b>ana150998martinez-wq</b> es la segunda cuenta de Ana María Martínez Castillo (confirmado). Sus cifras están sumadas a ana-martinez777.</span></div>
+  <div class="note watch"><span class="dot"></span><span><b>Sin cuenta de GitHub enlazada:</b> Sergio David Vargas Trujillo y Jeison Camilo Dueñas Lozano. Sus commits no aparecen en su perfil de GitHub, y por eso tampoco tienen PR.</span></div>
+  <div class="note watch"><span class="dot"></span><span><b>chaarlyez</b> quedó enlazado a Carlos Fernando Betancourt López (confirmado).</span></div>
+</div></div></div></section>`;
+
+h += `<footer>
+  <span class="eyebrow">Método</span>
+  <p>Se revisaron todas las ramas con <code>git log --no-merges</code> en formato <code>tformat</code>. Cada archivo se comparó con la plantilla del framework (jesusarielgb-works/microservices-governance-framework) normalizando CRLF a LF. Se descontó el commit de siembra de ariel5253 en los 6 repos (98 archivos cada uno); no hubo reimportaciones de 40 archivos o más. Un archivo con trabajo real se acredita solo a quien escribió primero un contenido distinto de la plantilla.</p>
+  <p>Cruce con el padrón por correo y nombre de autor. Los emparejamientos dudosos los confirmó la instructora. La evidencia detallada se conserva fuera de este sitio.</p>
+</footer>`;
+
+document.getElementById('app').innerHTML = h;
+})();
+</script>
+
+</body></html>

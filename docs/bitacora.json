@@ -1,0 +1,29 @@
+[
+  {
+    "fecha": "2026-11-05",
+    "ruta": "2026-11-05-prueba-manager-library-7-informes",
+    "titulo": "Prueba Manager Library: 7 informes (anonimizado)",
+    "resumen": "18 aprendices con codigo A01-A18. Ventana 7:00-11:00 del 23-oct con 0 commits: 95 commits fueron la noche anterior, por eso los informes 1 y 2 quedan en 0.",
+    "archivos": 1,
+    "autor": "Jesús Ariel González Bonilla",
+    "creado_en": "2026-11-05T20:44:03-05:00"
+  },
+  {
+    "fecha": "2026-10-19",
+    "ruta": "2026-10-19-entrega-00-06",
+    "titulo": "Entrega 00 a 06 y aporte (corte 19/10)",
+    "resumen": "Corte al 2026-10-19. Friend Point bajó de 151 a 88 marcadores; los demás proyectos sin cambios desde el 15/10.",
+    "archivos": 1,
+    "autor": "karol",
+    "creado_en": "2026-10-19T17:21:17-05:00"
+  },
+  {
+    "fecha": "2026-10-15",
+    "ruta": "2026-10-15-entrega-00-06",
+    "titulo": "Entrega 00 a 06 y aporte",
+    "resumen": "Corte al 2026-10-15. 4 de 6 proyectos con 7/7 secciones entregadas; 8 de 42 completas.",
+    "archivos": 1,
+    "autor": "Karol Daniela Correa Trujillo",
+    "creado_en": "2026-10-15T21:39:58-05:00"
+  }
+]
