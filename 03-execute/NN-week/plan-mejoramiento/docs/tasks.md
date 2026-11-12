@@ -27,6 +27,9 @@ Cada tarea se completa cuando existe evidencia verificable. El estado inicial es
 | T-21 | Crear el sembrador de demostración que carga información mediante la API. | T-16, T-20 | Carga al menos 40 juegos, 10 socios y 15 préstamos, incluidos 3 vencidos, sin escribir directamente en la base. |
 | T-22 | Implementar en React las pantallas de inicio de sesión, catálogo, socios, préstamos, devoluciones, vencidos y reporte. | T-16, T-20 | Se puede completar el recorrido de operación con datos de demostración. |
 | T-23 | Crear el sitio público estático de presentación del producto. | — | La página presenta la ludoteca en escritorio y móvil, y no depende de la API. |
+## Datos vencidos de demostración (T-21)
+
+En el entorno de demostración, la API usa un reloj configurable. El sembrador registra por la API tres préstamos de una línea, para tres socios distintos, con el reloj fijado once días atrás. Después se restablece la hora actual y se cargan los demás préstamos. `GET /api/v1/loans/overdue` debe mostrar las tres líneas vencidas.
 
 ## Definición de terminado
 

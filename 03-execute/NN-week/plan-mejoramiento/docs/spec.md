@@ -108,7 +108,7 @@ Como administrador u operador, quiero ver los juegos que no han sido devueltos a
 
 Como administrador, quiero consultar un reporte por rango de fechas para identificar los juegos más solicitados.
 
-- **CA-10.1** El reporte muestra una fila por juego, el nombre de su categoría conservado en la operación y la cantidad de préstamos en el rango.
+- - **CA-10.1** El reporte agrupa las líneas prestadas en el periodo por identificador del juego, título histórico y categoría histórica. Cada fila muestra cuántas veces se prestó esa combinación.
 - **CA-10.2** Si la fecha final es anterior a la inicial, responde `422`. Si no hubo préstamos, devuelve una lista vacía.
 - **CA-10.3** El reporte no expone información personal de socios ni operadores.
 - **CA-10.4** Cambiar el título o la categoría del catálogo no modifica los datos históricos del reporte.
