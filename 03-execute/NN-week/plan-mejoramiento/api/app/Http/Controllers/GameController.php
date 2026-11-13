@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGameRequest;
+use App\Http\Requests\UpdateGameRequest;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -47,5 +48,66 @@ class GameController extends Controller
         unset($game['category_id']);
 
         return response()->json($game, 201);
+    }
+
+    public function update(UpdateGameRequest $request, string $id): JsonResponse
+    {
+        $data = $request->validated();
+
+        return DB::transaction(function () use ($data, $id): JsonResponse {
+            $game = Str::isUuid($id)
+                ? DB::table('games')
+                    ->where('id', $id)
+                    ->whereNull('deleted_at')
+                    ->lockForUpdate()
+                    ->first()
+                : null;
+
+            if ($game === null) {
+                return response()->json([
+                    'code' => 'NOT_FOUND',
+                    'message' => 'El juego no existe o está dado de baja.',
+                    'details' => [],
+                ], 404);
+            }
+
+            $totalUnits = (int) $data['total_units'];
+            $loanedUnits = $game->total_units - $game->available_units;
+            $availableUnits = $totalUnits - $loanedUnits;
+
+            if ($availableUnits < 0) {
+                $message = 'El total no puede ser menor que la cantidad de unidades prestadas.';
+
+                return response()->json([
+                    'code' => 'VALIDATION_ERROR',
+                    'message' => $message,
+                    'details' => [['field' => 'total_units', 'issue' => $message]],
+                ], 422);
+            }
+
+            $changes = [
+                'title' => $data['title'],
+                'designer' => $data['designer'],
+                'category_id' => $data['category_id'],
+                'total_units' => $totalUnits,
+                'available_units' => $availableUnits,
+            ];
+
+            DB::table('games')->where('id', $id)->update($changes);
+
+            return response()->json([
+                'id' => $game->id,
+                'title' => $changes['title'],
+                'designer' => $changes['designer'],
+                'ean' => $game->ean,
+                'category' => DB::table('categories')
+                    ->select('id', 'name')
+                    ->where('id', $changes['category_id'])
+                    ->first(),
+                'total_units' => $totalUnits,
+                'available_units' => $availableUnits,
+                'cover_key' => $game->cover_key,
+            ]);
+        });
     }
 }
