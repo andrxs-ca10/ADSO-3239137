@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -47,6 +48,46 @@ class CreateOperatorAuthorizationTest extends TestCase
         $this->postJson('/api/v1/users', $this->operatorData())
             ->assertUnauthorized()
             ->assertJsonPath('code', 'UNAUTHENTICATED');
+
+        $this->assertDatabaseMissing('users', ['username' => 'operador_nuevo']);
+    }
+
+    public function test_invalid_tokens_cannot_create_an_operator(): void
+    {
+        $this->loginAs('admin');
+
+        $adminId = User::query()->where('username', 'prueba_admin')->value('id');
+        self::assertNotNull($adminId);
+
+        $now = time();
+        $claims = [
+            'sub' => (string) $adminId,
+            'role' => 'admin',
+            'iat' => $now - 600,
+            'exp' => $now + 300,
+        ];
+
+        $tokens = [
+            'vencido' => JWT::encode(
+                array_replace($claims, ['exp' => $now - 300]),
+                config('auth.jwt_secret'),
+                'HS256',
+            ),
+            'firma incorrecta' => JWT::encode(
+                $claims,
+                bin2hex(random_bytes(32)),
+                'HS256',
+            ),
+            'malformado' => 'token-invalido',
+        ];
+
+        foreach ($tokens as $case => $token) {
+            $response = $this->withToken($token)
+                ->postJson('/api/v1/users', $this->operatorData());
+
+            self::assertSame(401, $response->status(), "Token {$case}.");
+            $response->assertJsonPath('code', 'UNAUTHENTICATED');
+        }
 
         $this->assertDatabaseMissing('users', ['username' => 'operador_nuevo']);
     }
