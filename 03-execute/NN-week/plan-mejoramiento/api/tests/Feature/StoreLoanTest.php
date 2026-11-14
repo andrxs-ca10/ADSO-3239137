@@ -243,6 +243,33 @@ class StoreLoanTest extends TestCase
         self::assertSame([3, 1], $items->pluck('days_late')->all());
     }
 
+        public function test_operator_can_view_a_loan_with_its_items(): void
+    {
+        $gameId = $this->createGame('4006381333931');
+        $loan = $this->borrow([$gameId])->assertCreated();
+
+        $this->getJson('/api/v1/loans/'.$loan->json('id'))
+            ->assertOk()
+            ->assertJsonPath('id', $loan->json('id'))
+            ->assertJsonPath('member_id', $this->memberId)
+            ->assertJsonPath('loaned_at', $loan->json('loaned_at'))
+            ->assertJsonPath('status', 'open')
+            ->assertJsonCount(1, 'items')
+            ->assertJsonPath('items.0.id', $loan->json('items.0.id'))
+            ->assertJsonPath('items.0.game_id', $gameId)
+            ->assertJsonPath('items.0.game_title_snapshot', 'Juego de prueba')
+            ->assertJsonPath('items.0.ean_snapshot', '4006381333931')
+            ->assertJsonPath('items.0.due_at', $loan->json('items.0.due_at'))
+            ->assertJsonPath('items.0.returned_at', null);
+    }
+
+    public function test_loan_detail_returns_404_for_an_unknown_loan(): void
+    {
+        $this->getJson('/api/v1/loans/'.Str::uuid())
+            ->assertNotFound()
+            ->assertJsonPath('code', 'NOT_FOUND');
+    }
+
     private function createGame(string $ean, int $availableUnits = 1): string
     {
         $id = (string) Str::uuid();

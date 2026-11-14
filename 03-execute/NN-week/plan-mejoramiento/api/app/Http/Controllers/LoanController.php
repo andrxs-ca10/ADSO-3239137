@@ -204,6 +204,46 @@ class LoanController extends Controller
         return response()->json(['items' => $items]);
     }
 
+        public function show(string $id): JsonResponse
+    {
+        $loan = Str::isUuid($id)
+            ? DB::table('loans')->where('id', $id)->first()
+            : null;
+
+        if ($loan === null) {
+            return $this->error('NOT_FOUND', 'El préstamo no existe.', 404);
+        }
+
+        $items = DB::table('loan_items')
+            ->where('loan_id', $loan->id)
+            ->orderBy('id')
+            ->get()
+            ->map(static fn (object $item): array => [
+                'id' => $item->id,
+                'game_id' => $item->game_id,
+                'game_title_snapshot' => $item->game_title_snapshot,
+                'ean_snapshot' => $item->ean_snapshot,
+                'category_name_snapshot' => $item->category_name_snapshot,
+                'due_at' => CarbonImmutable::parse($item->due_at, 'UTC'),
+                'returned_at' => $item->returned_at === null
+                    ? null
+                    : CarbonImmutable::parse($item->returned_at, 'UTC'),
+            ]);
+
+        $status = LoanStatus::fromItems($items, CarbonImmutable::now('UTC')->startOfSecond());
+
+        return response()->json([
+            'id' => $loan->id,
+            'member_id' => $loan->member_id,
+            'loaned_at' => CarbonImmutable::parse($loan->loaned_at, 'UTC')->toIso8601ZuluString(),
+            'status' => $status->value,
+            'items' => $items->map(static fn (array $item): array => array_replace($item, [
+                'due_at' => $item['due_at']->toIso8601ZuluString(),
+                'returned_at' => $item['returned_at']?->toIso8601ZuluString(),
+            ]))->all(),
+        ]);
+    }
+
     private function error(string $code, string $message, int $status, array $details = []): JsonResponse
     {
         return response()->json([
