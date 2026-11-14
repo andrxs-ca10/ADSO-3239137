@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
@@ -150,5 +151,96 @@ class GameController extends Controller
 
             return response()->noContent();
         });
+    }
+
+        public function index(Request $request): JsonResponse
+    {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:255'],
+            'category_id' => ['nullable', 'uuid'],
+            'page' => ['sometimes', 'integer', 'min:1'],
+            'size' => ['sometimes', 'integer', 'min:1', 'max:50'],
+        ]);
+
+        $query = $this->activeGamesQuery();
+        $search = trim($filters['q'] ?? '');
+
+        if ($search !== '') {
+            $pattern = '%'.strtr($search, ['!' => '!!', '%' => '!%', '_' => '!_']).'%';
+
+            $query->where(function ($query) use ($pattern): void {
+                $query->whereRaw("games.title ILIKE ? ESCAPE '!'", [$pattern])
+                    ->orWhereRaw("games.designer ILIKE ? ESCAPE '!'", [$pattern]);
+            });
+        }
+
+        if (isset($filters['category_id'])) {
+            $query->where('games.category_id', $filters['category_id']);
+        }
+
+        $page = (int) ($filters['page'] ?? 1);
+        $size = (int) ($filters['size'] ?? 20);
+        $games = $query->orderBy('games.title')
+            ->orderBy('games.id')
+            ->paginate($size, ['*'], 'page', $page);
+
+        return response()->json([
+            'items' => $games->getCollection()->map($this->catalogGame(...))->values(),
+            'page' => $games->currentPage(),
+            'size' => $games->perPage(),
+            'total' => $games->total(),
+        ]);
+    }
+
+    public function show(string $id): JsonResponse
+    {
+        $game = Str::isUuid($id)
+            ? $this->activeGamesQuery()->where('games.id', $id)->first()
+            : null;
+
+        if ($game === null) {
+            return response()->json([
+                'code' => 'NOT_FOUND',
+                'message' => 'El juego no existe o está dado de baja.',
+                'details' => [],
+            ], 404);
+        }
+
+        return response()->json($this->catalogGame($game));
+    }
+
+    private function activeGamesQuery(): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('games')
+            ->join('categories', 'categories.id', '=', 'games.category_id')
+            ->whereNull('games.deleted_at')
+            ->select([
+                'games.id',
+                'games.title',
+                'games.designer',
+                'games.ean',
+                'games.category_id',
+                'categories.name as category_name',
+                'games.total_units',
+                'games.available_units',
+                'games.cover_key',
+            ]);
+    }
+
+    private function catalogGame(object $game): array
+    {
+        return [
+            'id' => $game->id,
+            'title' => $game->title,
+            'designer' => $game->designer,
+            'ean' => $game->ean,
+            'category' => [
+                'id' => $game->category_id,
+                'name' => $game->category_name,
+            ],
+            'total_units' => (int) $game->total_units,
+            'available_units' => (int) $game->available_units,
+            'cover_key' => $game->cover_key,
+        ];
     }
 }
