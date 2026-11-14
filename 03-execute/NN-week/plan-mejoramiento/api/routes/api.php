@@ -9,6 +9,7 @@ use App\Http\Middleware\AuthenticateJwt;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\GameCoverController;
 
 Route::get('/v1/health', function () {
     return response()->json(['status' => 'ok']);
@@ -31,6 +32,8 @@ Route::middleware(AuthenticateJwt::class.':admin,operator')->group(function () {
     Route::get('/v1/members', [MemberController::class, 'index']);
     Route::get('/v1/members/{id}', [MemberController::class, 'show']);
     Route::post('/v1/members', [MemberController::class, 'store']);
+    Route::get('/v1/games/{id}/cover', [GameCoverController::class, 'show']);
+
 });
 
 Route::middleware(AuthenticateJwt::class.':admin')->group(function () {
@@ -38,4 +41,6 @@ Route::middleware(AuthenticateJwt::class.':admin')->group(function () {
     Route::put('/v1/games/{id}', [GameController::class, 'update']);
     Route::delete('/v1/games/{id}', [GameController::class, 'destroy']);
     Route::get('/v1/reports/most-requested', [ReportController::class, 'mostRequested']);
+    Route::put('/v1/games/{id}/cover', [GameCoverController::class, 'store']);
+    Route::delete('/v1/games/{id}/cover', [GameCoverController::class, 'destroy']);
 });
