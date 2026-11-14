@@ -2,13 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\LoanController;
-use Illuminate\Auth\GenericUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class StoreLoanTest extends TestCase
@@ -23,7 +21,7 @@ class StoreLoanTest extends TestCase
     {
         parent::setUp();
 
-        Route::post('/api/testing/loans', [LoanController::class, 'store']);
+        config(['auth.jwt_secret' => bin2hex(random_bytes(32))]);
 
         $this->memberId = (string) Str::uuid();
         $this->categoryId = (string) Str::uuid();
@@ -40,14 +38,22 @@ class StoreLoanTest extends TestCase
             'name' => 'Categoría '.$this->categoryId,
         ]);
 
+        $username = 'operator-'.$this->operatorId;
+        $password = 'test-password';
+
         DB::table('users')->insert([
             'id' => $this->operatorId,
-            'username' => 'operator-'.$this->operatorId,
-            'password_hash' => Hash::make('test-password'),
+            'username' => $username,
+            'password_hash' => Hash::make($password),
             'role' => 'operator',
         ]);
 
-        $this->actingAs(new GenericUser(['id' => $this->operatorId]));
+        $token = $this->postJson('/api/v1/auth/login', [
+            'username' => $username,
+            'password' => $password,
+        ])->assertOk()->json('access_token');
+
+        $this->withToken($token);
     }
 
     public function test_it_registers_a_loan_due_in_ten_days(): void
@@ -74,7 +80,10 @@ class StoreLoanTest extends TestCase
             'ean_snapshot' => '4006381333931',
         ]);
 
-        $this->assertDatabaseHas('games', ['id' => $gameId, 'available_units' => 0]);
+        $this->assertDatabaseHas('games', [
+            'id' => $gameId,
+            'available_units' => 0,
+        ]);
     }
 
     public function test_it_counts_previous_loans_toward_the_member_limit(): void
@@ -95,6 +104,7 @@ class StoreLoanTest extends TestCase
 
         $this->assertDatabaseMissing('loan_items', ['game_id' => $fifthGame]);
         $this->assertDatabaseHas('games', ['id' => $fifthGame, 'available_units' => 1]);
+
         self::assertSame(2, DB::table('loans')->where('member_id', $this->memberId)->count());
     }
 
@@ -109,6 +119,42 @@ class StoreLoanTest extends TestCase
 
         $this->assertDatabaseMissing('loans', ['member_id' => $this->memberId]);
         $this->assertDatabaseHas('games', ['id' => $availableGame, 'available_units' => 1]);
+    }
+
+    public function test_it_rejects_a_new_loan_when_the_member_has_an_overdue_item(): void
+    {
+        $firstGame = $this->createGame('4006381333931');
+        $nextGame = $this->createGame('0123456789012');
+
+        $loanId = $this->borrow([$firstGame])->assertCreated()->json('id');
+        $loanedAt = now('UTC')->subDays(11);
+
+        DB::table('loans')->where('id', $loanId)
+            ->update(['loaned_at' => $loanedAt]);
+
+        DB::table('loan_items')->where('loan_id', $loanId)
+            ->update(['due_at' => $loanedAt->copy()->addDays(10)]);
+
+        $this->borrow([$nextGame])
+            ->assertConflict()
+            ->assertJsonPath('code', 'MEMBER_HAS_OVERDUE');
+
+        $this->assertDatabaseMissing('loan_items', ['game_id' => $nextGame]);
+        $this->assertDatabaseHas('games', ['id' => $nextGame, 'available_units' => 1]);
+
+        self::assertSame(1, DB::table('loans')->where('member_id', $this->memberId)->count());
+    }
+
+    public function test_it_rejects_repeated_games_in_the_same_request(): void
+    {
+        $gameId = $this->createGame('4006381333931');
+
+        $this->borrow([$gameId, $gameId])
+            ->assertUnprocessable()
+            ->assertJsonPath('code', 'DUPLICATE_GAME_IN_LOAN');
+
+        $this->assertDatabaseMissing('loans', ['member_id' => $this->memberId]);
+        $this->assertDatabaseHas('games', ['id' => $gameId, 'available_units' => 1]);
     }
 
     private function createGame(string $ean, int $availableUnits = 1): string
@@ -128,9 +174,9 @@ class StoreLoanTest extends TestCase
         return $id;
     }
 
-    private function borrow(array $gameIds): \Illuminate\Testing\TestResponse
+    private function borrow(array $gameIds): TestResponse
     {
-        return $this->postJson('/api/testing/loans', [
+        return $this->postJson('/api/v1/loans', [
             'member_id' => $this->memberId,
             'items' => array_map(
                 static fn (string $gameId): array => ['game_id' => $gameId],
