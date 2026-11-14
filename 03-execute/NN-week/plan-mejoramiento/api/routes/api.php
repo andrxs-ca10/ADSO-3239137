@@ -7,6 +7,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\AuthenticateJwt;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/v1/health', function () {
     return response()->json(['status' => 'ok']);
@@ -23,6 +24,7 @@ Route::middleware(AuthenticateJwt::class.':admin,operator')->group(function () {
     Route::post('/v1/loans', [LoanController::class, 'store']);
     Route::post('/v1/loans/{loan_id}/items/{item_id}/return', [LoanController::class, 'returnItem']);
     Route::get('/v1/loans/overdue', [LoanController::class, 'overdue']);
+    Route::get('/v1/categories', [CategoryController::class, 'index']);
 });
 
 Route::middleware(AuthenticateJwt::class.':admin')->group(function () {
