@@ -51,7 +51,9 @@ class StoreMemberTest extends TestCase
 
         $this->postJson(self::MEMBERS_URL, [])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['full_name', 'document_number']);
+            ->assertJsonPath('code', 'VALIDATION_ERROR')
+            ->assertJsonFragment(['field' => 'full_name'])
+            ->assertJsonFragment(['field' => 'document_number']);
     }
 
     public function test_creating_a_member_requires_a_token(): void

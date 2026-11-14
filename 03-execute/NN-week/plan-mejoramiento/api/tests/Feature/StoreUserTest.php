@@ -59,7 +59,8 @@ class StoreUserTest extends TestCase
 
         $this->postJson('/api/testing/users', $data)
             ->assertUnprocessable()
-            ->assertJsonValidationErrors('role');
+            ->assertJsonPath('code', 'VALIDATION_ERROR')
+            ->assertJsonFragment(['field' => 'role']);
 
         $this->assertDatabaseMissing('users', ['username' => 'operador1']);
     }

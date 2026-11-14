@@ -117,7 +117,8 @@ class GameCoverTest extends TestCase
 
             $this->put($this->url, ['file' => $file], ['Accept' => 'application/json'])
                 ->assertUnprocessable()
-                ->assertJsonValidationErrors('file');
+                ->assertJsonPath('code', 'VALIDATION_ERROR')
+                ->assertJsonFragment(['field' => 'file']);
 
             Storage::disk('local')->assertDirectoryEmpty('game-covers');
         } finally {
@@ -131,7 +132,8 @@ class GameCoverTest extends TestCase
 
         $this->put($this->url, ['file' => $file], ['Accept' => 'application/json'])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors('file');
+            ->assertJsonPath('code', 'VALIDATION_ERROR')
+            ->assertJsonFragment(['field' => 'file']);
 
         Storage::disk('local')->assertDirectoryEmpty('game-covers');
     }

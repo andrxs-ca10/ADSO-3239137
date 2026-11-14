@@ -53,7 +53,8 @@ class StoreGameTest extends TestCase
 
         $this->postJson('/api/testing/games', $data)
             ->assertUnprocessable()
-            ->assertJsonValidationErrors('total_units');
+            ->assertJsonPath('code', 'VALIDATION_ERROR')
+            ->assertJsonFragment(['field' => 'total_units']);
     }
 
     private function gameData(): array
