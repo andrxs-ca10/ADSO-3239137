@@ -156,6 +156,47 @@ class StoreLoanTest extends TestCase
         $this->assertDatabaseMissing('loans', ['member_id' => $this->memberId]);
         $this->assertDatabaseHas('games', ['id' => $gameId, 'available_units' => 1]);
     }
+        public function test_it_returns_a_loan_item_only_once(): void
+    {
+        $gameId = $this->createGame('4006381333931');
+        $loan = $this->borrow([$gameId])->assertCreated();
+
+        $loanId = $loan->json('id');
+        $itemId = $loan->json('items.0.id');
+        $returnUrl = "/api/v1/loans/{$loanId}/items/{$itemId}/return";
+
+        $this->assertDatabaseHas('games', [
+            'id' => $gameId,
+            'available_units' => 0,
+        ]);
+
+        $this->postJson($returnUrl)
+            ->assertOk()
+            ->assertJsonPath('id', $itemId)
+            ->assertJsonPath('game_id', $gameId);
+
+        $returnedAt = DB::table('loan_items')->where('id', $itemId)->value('returned_at');
+        self::assertNotNull($returnedAt);
+
+        $this->assertDatabaseHas('games', [
+            'id' => $gameId,
+            'available_units' => 1,
+        ]);
+
+        $this->postJson($returnUrl)
+            ->assertConflict()
+            ->assertJsonPath('code', 'ITEM_ALREADY_RETURNED');
+
+        $this->assertDatabaseHas('games', [
+            'id' => $gameId,
+            'available_units' => 1,
+        ]);
+
+        $this->assertDatabaseHas('loan_items', [
+            'id' => $itemId,
+            'returned_at' => $returnedAt,
+        ]);
+    }
 
     private function createGame(string $ean, int $availableUnits = 1): string
     {

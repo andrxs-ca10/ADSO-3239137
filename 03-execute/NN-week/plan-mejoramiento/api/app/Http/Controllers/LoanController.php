@@ -123,6 +123,52 @@ class LoanController extends Controller
             ], 201);
         });
     }
+        public function returnItem(string $loan_id, string $item_id): JsonResponse
+    {
+        if (! Str::isUuid($loan_id) || ! Str::isUuid($item_id)) {
+            return $this->error('NOT_FOUND', 'La línea de préstamo no existe.', 404);
+        }
+
+        return DB::transaction(function () use ($loan_id, $item_id): JsonResponse {
+            $item = DB::table('loan_items')
+                ->where('loan_id', $loan_id)
+                ->where('id', $item_id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($item === null) {
+                return $this->error('NOT_FOUND', 'La línea de préstamo no existe.', 404);
+            }
+
+            if ($item->returned_at !== null) {
+                return $this->error(
+                    'ITEM_ALREADY_RETURNED',
+                    'Este juego ya fue devuelto.',
+                    409,
+                );
+            }
+
+            $returnedAt = CarbonImmutable::now('UTC')->startOfSecond();
+
+            DB::table('loan_items')
+                ->where('id', $item->id)
+                ->update(['returned_at' => $returnedAt]);
+
+            DB::table('games')
+                ->where('id', $item->game_id)
+                ->increment('available_units');
+
+            return response()->json([
+                'id' => $item->id,
+                'game_id' => $item->game_id,
+                'game_title_snapshot' => $item->game_title_snapshot,
+                'ean_snapshot' => $item->ean_snapshot,
+                'category_name_snapshot' => $item->category_name_snapshot,
+                'due_at' => CarbonImmutable::parse($item->due_at, 'UTC')->toIso8601ZuluString(),
+                'returned_at' => $returnedAt->toIso8601ZuluString(),
+            ]);
+        });
+    }
 
     private function error(string $code, string $message, int $status, array $details = []): JsonResponse
     {
