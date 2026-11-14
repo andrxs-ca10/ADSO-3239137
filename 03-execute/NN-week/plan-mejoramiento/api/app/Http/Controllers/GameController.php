@@ -6,6 +6,7 @@ use App\Http\Requests\StoreGameRequest;
 use App\Http\Requests\UpdateGameRequest;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -108,6 +109,46 @@ class GameController extends Controller
                 'available_units' => $availableUnits,
                 'cover_key' => $game->cover_key,
             ]);
+        });
+    }
+
+    public function destroy(string $id): Response|JsonResponse
+    {
+        return DB::transaction(function () use ($id): Response|JsonResponse {
+            $game = Str::isUuid($id)
+                ? DB::table('games')
+                    ->where('id', $id)
+                    ->whereNull('deleted_at')
+                    ->lockForUpdate()
+                    ->first()
+                : null;
+
+            if ($game === null) {
+                return response()->json([
+                    'code' => 'NOT_FOUND',
+                    'message' => 'El juego no existe o está dado de baja.',
+                    'details' => [],
+                ], 404);
+            }
+
+            $hasOpenLoans = DB::table('loan_items')
+                ->where('game_id', $game->id)
+                ->whereNull('returned_at')
+                ->exists();
+
+            if ($hasOpenLoans) {
+                return response()->json([
+                    'code' => 'GAME_HAS_OPEN_LOANS',
+                    'message' => 'El juego tiene préstamos sin devolver.',
+                    'details' => [],
+                ], 409);
+            }
+
+            DB::table('games')
+                ->where('id', $game->id)
+                ->update(['deleted_at' => now()]);
+
+            return response()->noContent();
         });
     }
 }
