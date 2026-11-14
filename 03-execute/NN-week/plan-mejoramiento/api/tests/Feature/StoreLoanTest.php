@@ -198,6 +198,51 @@ class StoreLoanTest extends TestCase
         ]);
     }
 
+        public function test_it_lists_only_unreturned_overdue_items_in_order(): void
+    {
+        $this->travelTo(now('UTC')->startOfSecond());
+
+        $olderLoan = $this->borrow([$this->createGame('4006381333931')])->assertCreated();
+        $newerLoan = $this->borrow([$this->createGame('0123456789012')])->assertCreated();
+        $returnedLoan = $this->borrow([$this->createGame('96385074')])->assertCreated();
+        $currentLoan = $this->borrow([$this->createGame('5901234123457')])->assertCreated();
+
+        foreach ([[$olderLoan, 13], [$newerLoan, 11], [$returnedLoan, 12]] as [$loan, $daysAgo]) {
+            $loanedAt = now('UTC')->subDays($daysAgo);
+
+            DB::table('loans')->where('id', $loan->json('id'))
+                ->update(['loaned_at' => $loanedAt]);
+
+            DB::table('loan_items')->where('id', $loan->json('items.0.id'))
+                ->update(['due_at' => $loanedAt->copy()->addDays(10)]);
+        }
+
+        $returnedLoanId = $returnedLoan->json('id');
+        $returnedItemId = $returnedLoan->json('items.0.id');
+
+        $this->postJson("/api/v1/loans/{$returnedLoanId}/items/{$returnedItemId}/return")
+            ->assertOk();
+
+        $response = $this->getJson('/api/v1/loans/overdue')->assertOk();
+
+        $loanIds = [
+            $olderLoan->json('id'),
+            $newerLoan->json('id'),
+            $returnedLoanId,
+            $currentLoan->json('id'),
+        ];
+
+        $items = collect($response->json('items'))
+            ->whereInStrict('loan_id', $loanIds)
+            ->values();
+
+        self::assertSame(
+            [$olderLoan->json('items.0.id'), $newerLoan->json('items.0.id')],
+            $items->pluck('item_id')->all(),
+        );
+        self::assertSame([3, 1], $items->pluck('days_late')->all());
+    }
+
     private function createGame(string $ean, int $availableUnits = 1): string
     {
         $id = (string) Str::uuid();

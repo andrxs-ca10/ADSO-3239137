@@ -170,6 +170,40 @@ class LoanController extends Controller
         });
     }
 
+        public function overdue(): JsonResponse
+    {
+        $now = CarbonImmutable::now('UTC')->startOfSecond();
+
+        $items = DB::table('loan_items')
+            ->join('loans', 'loans.id', '=', 'loan_items.loan_id')
+            ->join('members', 'members.id', '=', 'loans.member_id')
+            ->whereNull('loan_items.returned_at')
+            ->where('loan_items.due_at', '<', $now)
+            ->orderBy('loan_items.due_at')
+            ->orderBy('loan_items.id')
+            ->get([
+                'loan_items.loan_id',
+                'loan_items.id as item_id',
+                'loan_items.game_title_snapshot as game_title',
+                'members.full_name as member_name',
+                'loan_items.due_at',
+            ])
+            ->map(static function (object $item) use ($now): array {
+                $dueAt = CarbonImmutable::parse($item->due_at, 'UTC');
+
+                return [
+                    'loan_id' => $item->loan_id,
+                    'item_id' => $item->item_id,
+                    'game_title' => $item->game_title,
+                    'member_name' => $item->member_name,
+                    'due_at' => $dueAt->toIso8601ZuluString(),
+                    'days_late' => (int) ceil($dueAt->diffInSeconds($now) / 86400),
+                ];
+            });
+
+        return response()->json(['items' => $items]);
+    }
+
     private function error(string $code, string $message, int $status, array $details = []): JsonResponse
     {
         return response()->json([

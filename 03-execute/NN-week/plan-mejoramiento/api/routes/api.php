@@ -21,6 +21,7 @@ Route::middleware(AuthenticateJwt::class.':admin,operator')->group(function () {
     Route::get('/v1/games/{id}', [GameController::class, 'show']);
     Route::post('/v1/loans', [LoanController::class, 'store']);
     Route::post('/v1/loans/{loan_id}/items/{item_id}/return', [LoanController::class, 'returnItem']);
+    Route::get('/v1/loans/overdue', [LoanController::class, 'overdue']);
 });
 
 Route::middleware(AuthenticateJwt::class.':admin')->group(function () {
