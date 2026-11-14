@@ -270,6 +270,60 @@ class StoreLoanTest extends TestCase
             ->assertJsonPath('code', 'NOT_FOUND');
     }
 
+        public function test_operator_can_filter_and_paginate_loans(): void
+    {
+        $older = $this->borrow([$this->createGame('4006381333931')])->assertCreated();
+        $newer = $this->borrow([$this->createGame('0123456789012')])->assertCreated();
+
+        $this->travelTo(now('UTC')->startOfSecond());
+        $day = now('UTC')->subDays(11)->startOfDay();
+
+        DB::table('loans')->where('id', $older->json('id'))
+            ->update(['loaned_at' => $day]);
+
+        DB::table('loans')->where('id', $newer->json('id'))
+            ->update(['loaned_at' => $day->copy()->endOfDay()]);
+
+        DB::table('loan_items')->where('loan_id', $older->json('id'))
+            ->update(['due_at' => $day->copy()->addDays(10)]);
+
+        $url = '/api/v1/loans?'.http_build_query([
+            'member_id' => $this->memberId,
+            'from' => $day->toDateString(),
+            'to' => $day->toDateString(),
+            'size' => 1,
+        ]);
+
+        $this->getJson($url.'&page=1')
+            ->assertOk()
+            ->assertJsonPath('page', 1)
+            ->assertJsonPath('size', 1)
+            ->assertJsonPath('total', 2)
+            ->assertJsonCount(1, 'items')
+            ->assertJsonPath('items.0.id', $newer->json('id'))
+            ->assertJsonPath('items.0.status', 'open');
+
+        $this->getJson($url.'&page=2')
+            ->assertOk()
+            ->assertJsonPath('page', 2)
+            ->assertJsonPath('total', 2)
+            ->assertJsonCount(1, 'items')
+            ->assertJsonPath('items.0.id', $older->json('id'));
+
+        $this->getJson($url.'&status=overdue')
+            ->assertOk()
+            ->assertJsonPath('total', 1)
+            ->assertJsonPath('items.0.id', $older->json('id'))
+            ->assertJsonPath('items.0.status', 'overdue');
+    }
+
+    public function test_loan_list_rejects_an_inverted_date_range(): void
+    {
+        $this->getJson('/api/v1/loans?from=2026-11-14&to=2026-11-13')
+            ->assertUnprocessable()
+            ->assertJsonPath('code', 'INVALID_DATE_RANGE');
+    }
+    
     private function createGame(string $ean, int $availableUnits = 1): string
     {
         $id = (string) Str::uuid();

@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
@@ -241,6 +242,89 @@ class LoanController extends Controller
                 'due_at' => $item['due_at']->toIso8601ZuluString(),
                 'returned_at' => $item['returned_at']?->toIso8601ZuluString(),
             ]))->all(),
+        ]);
+    }
+
+        public function index(Request $request): JsonResponse
+    {
+        $filters = $request->validate([
+            'from' => ['sometimes', 'date_format:Y-m-d'],
+            'to' => ['sometimes', 'date_format:Y-m-d'],
+            'status' => ['sometimes', 'in:open,overdue,closed'],
+            'member_id' => ['sometimes', 'uuid'],
+            'page' => ['sometimes', 'integer', 'min:1'],
+            'size' => ['sometimes', 'integer', 'min:1', 'max:50'],
+        ]);
+
+        if (isset($filters['from'], $filters['to']) && $filters['to'] < $filters['from']) {
+            $message = 'La fecha final no puede ser anterior a la fecha inicial.';
+
+            return $this->error('INVALID_DATE_RANGE', $message, 422, [
+                ['field' => 'to', 'issue' => $message],
+            ]);
+        }
+
+        $now = CarbonImmutable::now('UTC')->startOfSecond();
+
+        $loansWithStatus = DB::table('loans')
+            ->select(['loans.id', 'loans.member_id', 'loans.loaned_at'])
+            ->selectRaw(
+                "CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM loan_items
+                        WHERE loan_items.loan_id = loans.id
+                          AND loan_items.returned_at IS NULL
+                          AND loan_items.due_at < ?
+                    ) THEN 'overdue'
+                    WHEN EXISTS (
+                        SELECT 1 FROM loan_items
+                        WHERE loan_items.loan_id = loans.id
+                          AND loan_items.returned_at IS NULL
+                    ) THEN 'open'
+                    ELSE 'closed'
+                END AS status",
+                [$now],
+            );
+
+        if (isset($filters['member_id'])) {
+            $loansWithStatus->where('loans.member_id', $filters['member_id']);
+        }
+
+        if (isset($filters['from'])) {
+            $start = CarbonImmutable::parse($filters['from'], 'UTC')->startOfDay();
+            $loansWithStatus->where('loans.loaned_at', '>=', $start);
+        }
+
+        if (isset($filters['to'])) {
+            $end = CarbonImmutable::parse($filters['to'], 'UTC')->startOfDay()->addDay();
+            $loansWithStatus->where('loans.loaned_at', '<', $end);
+        }
+
+        $query = DB::query()->fromSub($loansWithStatus, 'loan_list');
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        $loans = $query->orderByDesc('loaned_at')
+            ->orderByDesc('id')
+            ->paginate(
+                (int) ($filters['size'] ?? 20),
+                ['*'],
+                'page',
+                (int) ($filters['page'] ?? 1),
+            );
+
+        return response()->json([
+            'items' => $loans->getCollection()->map(static fn (object $loan): array => [
+                'id' => $loan->id,
+                'member_id' => $loan->member_id,
+                'loaned_at' => CarbonImmutable::parse($loan->loaned_at, 'UTC')->toIso8601ZuluString(),
+                'status' => $loan->status,
+            ])->all(),
+            'page' => $loans->currentPage(),
+            'size' => $loans->perPage(),
+            'total' => $loans->total(),
         ]);
     }
 

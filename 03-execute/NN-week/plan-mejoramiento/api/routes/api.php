@@ -24,6 +24,7 @@ Route::middleware(AuthenticateJwt::class.':admin,operator')->group(function () {
     Route::get('/v1/games', [GameController::class, 'index']);
     Route::get('/v1/games/{id}', [GameController::class, 'show']);
     Route::get('/v1/games/{id}/cover', [GameCoverController::class, 'show']);
+    Route::get('/v1/loans', [LoanController::class, 'index']);
 
     Route::post('/v1/loans', [LoanController::class, 'store']);
     Route::get('/v1/loans/overdue', [LoanController::class, 'overdue']);
@@ -43,6 +44,5 @@ Route::middleware(AuthenticateJwt::class.':admin')->group(function () {
     Route::delete('/v1/games/{id}', [GameController::class, 'destroy']);
     Route::put('/v1/games/{id}/cover', [GameCoverController::class, 'store']);
     Route::delete('/v1/games/{id}/cover', [GameCoverController::class, 'destroy']);
-
     Route::get('/v1/reports/most-requested', [ReportController::class, 'mostRequested']);
 });
