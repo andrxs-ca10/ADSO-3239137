@@ -28,6 +28,9 @@ Route::middleware(AuthenticateJwt::class.':admin,operator')->group(function () {
     Route::get('/v1/categories', [CategoryController::class, 'index']);
     Route::get('/v1/members', [MemberController::class, 'index']);
     Route::get('/v1/members/{id}', [MemberController::class, 'show']);
+    Route::get('/v1/members', [MemberController::class, 'index']);
+    Route::get('/v1/members/{id}', [MemberController::class, 'show']);
+    Route::post('/v1/members', [MemberController::class, 'store']);
 });
 
 Route::middleware(AuthenticateJwt::class.':admin')->group(function () {

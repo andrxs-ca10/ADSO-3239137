@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreMemberRequest;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
@@ -16,7 +16,9 @@ class MemberController extends Controller
         $member = ['id' => (string) Str::uuid()] + $request->validated();
 
         try {
-            DB::table('members')->insert($member);
+            DB::transaction(function () use ($member): void {
+                DB::table('members')->insert($member);
+            });
         } catch (UniqueConstraintViolationException $exception) {
             if (! str_contains($exception->errorInfo[2] ?? '', '"members_document_number_unique"')) {
                 throw $exception;
@@ -32,7 +34,7 @@ class MemberController extends Controller
         return response()->json($member, 201);
     }
 
-        public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:255'],
@@ -69,7 +71,7 @@ class MemberController extends Controller
         ]);
     }
 
-        public function show(string $id): JsonResponse
+    public function show(string $id): JsonResponse
     {
         $member = Str::isUuid($id)
             ? DB::table('members')
@@ -98,5 +100,4 @@ class MemberController extends Controller
             'active_loans' => $activeLoans,
         ]);
     }
-
 }
