@@ -99,3 +99,36 @@ $demoGames = foreach ($number in 1..40) {
 }
 
 Write-Host "Juegos de demostracion disponibles: $($demoGames.Count)"
+
+$demoMembers = foreach ($number in 1..10) {
+    $document = 'BG-DEMO-{0:D2}' -f $number
+    $fullName = 'Socio Demo {0:D2}' -f $number
+
+    $search = Invoke-RestMethod -Method Get `
+        -Uri "$ApiBaseUrl/members?q=$document&size=50" `
+        -Headers $headers -TimeoutSec 15
+
+    $existingMember = $search.items |
+        Where-Object { $_.document_number -eq $document } |
+        Select-Object -First 1
+
+    if ($existingMember) {
+        if ($existingMember.full_name -ne $fullName) {
+            throw "El documento $document ya pertenece a '$($existingMember.full_name)'."
+        }
+
+        $existingMember
+        continue
+    }
+
+    $body = @{
+        full_name = $fullName
+        document_number = $document
+    } | ConvertTo-Json -Compress
+
+    Invoke-RestMethod -Method Post -Uri "$ApiBaseUrl/members" `
+        -Headers $headers -ContentType 'application/json' `
+        -Body $body -TimeoutSec 15
+}
+
+Write-Host "Socios de demostracion disponibles: $($demoMembers.Count)"
