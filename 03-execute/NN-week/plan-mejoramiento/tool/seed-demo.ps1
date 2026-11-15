@@ -132,3 +132,73 @@ $demoMembers = foreach ($number in 1..10) {
 }
 
 Write-Host "Socios de demostracion disponibles: $($demoMembers.Count)"
+
+$demoLoanIds = foreach ($index in 0..14) {
+    $isOverdueDemo = $index -lt 3
+    $memberIndex = if ($isOverdueDemo) {
+        $index
+    } else {
+        3 + (($index - 3) % 7)
+    }
+
+    $memberId = $demoMembers[$memberIndex].id
+    $gameId = $demoGames[$index].id
+    $loanPage = 1
+    $existingLoan = $null
+
+    do {
+        $loans = Invoke-RestMethod -Method Get `
+            -Uri "$ApiBaseUrl/loans?member_id=$memberId&page=$loanPage&size=50" `
+            -Headers $headers -TimeoutSec 15
+
+        foreach ($loan in $loans.items) {
+            $detail = Invoke-RestMethod -Method Get `
+                -Uri "$ApiBaseUrl/loans/$($loan.id)" `
+                -Headers $headers -TimeoutSec 15
+
+            if (@($detail.items).Count -eq 1 -and $detail.items[0].game_id -eq $gameId) {
+                $existingLoan = $detail
+                break
+            }
+        }
+
+        $loanPage++
+    } while (-not $existingLoan -and ($loans.page * $loans.size -lt $loans.total))
+
+    if ($existingLoan) {
+        $existingLoan.id
+        continue
+    }
+
+    $loanHeaders = $headers.Clone()
+    if ($isOverdueDemo) {
+        $loanHeaders['X-Demo-Loan-Clock'] = '11-days-ago'
+    }
+
+    $body = @{
+        member_id = $memberId
+        items = @(@{ game_id = $gameId })
+    } | ConvertTo-Json -Depth 4 -Compress
+
+    $created = Invoke-RestMethod -Method Post `
+        -Uri "$ApiBaseUrl/loans" `
+        -Headers $loanHeaders -ContentType 'application/json' `
+        -Body $body -TimeoutSec 15
+
+    $created.id
+}
+
+$overdue = Invoke-RestMethod -Method Get `
+    -Uri "$ApiBaseUrl/loans/overdue" -Headers $headers -TimeoutSec 15
+
+$expectedOverdueIds = $demoLoanIds | Select-Object -First 3
+$verifiedOverdue = @($overdue.items | Where-Object {
+    $_.loan_id -in $expectedOverdueIds
+})
+
+if ($demoLoanIds.Count -ne 15 -or $verifiedOverdue.Count -ne 3) {
+    throw 'La API no confirmo los 15 prestamos y los 3 vencidos esperados.'
+}
+
+Write-Host "Prestamos de demostracion: $($demoLoanIds.Count)"
+Write-Host "Vencidos de demostracion confirmados: $($verifiedOverdue.Count)"

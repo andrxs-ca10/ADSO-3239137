@@ -6,9 +6,9 @@ use App\Http\Requests\StoreLoanRequest;
 use App\Support\LoanStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
@@ -20,11 +20,21 @@ class LoanController extends Controller
             return $this->error('UNAUTHENTICATED', 'Debes iniciar sesión.', 401);
         }
 
+        $useDemoClock = $request->header('X-Demo-Loan-Clock') === '11-days-ago';
+
+        if ($useDemoClock && (
+            ! app()->environment('local')
+            || ! config('app.demo_loan_clock')
+            || $user->role !== 'admin'
+        )) {
+            return $this->error('DEMO_CLOCK_DISABLED', 'El reloj de demostración no está disponible.', 403);
+        }
+
         $data = $request->validated();
         $memberId = strtolower($data['member_id']);
         $gameIds = array_map('strtolower', array_column($data['items'], 'game_id'));
 
-        return DB::transaction(function () use ($user, $memberId, $gameIds): JsonResponse {
+        return DB::transaction(function () use ($user, $memberId, $gameIds, $useDemoClock): JsonResponse {
             $member = DB::table('members')
                 ->where('id', $memberId)
                 ->lockForUpdate()
@@ -42,14 +52,15 @@ class LoanController extends Controller
                 ->get()
                 ->keyBy('id');
 
-            $loanedAt = CarbonImmutable::now('UTC')->startOfSecond();
+            $now = CarbonImmutable::now('UTC')->startOfSecond();
+            $loanedAt = $useDemoClock ? $now->subDays(11) : $now;
 
             $pendingItems = DB::table('loan_items')
                 ->join('loans', 'loans.id', '=', 'loan_items.loan_id')
                 ->where('loans.member_id', $memberId)
                 ->whereNull('loan_items.returned_at');
 
-            if ((clone $pendingItems)->where('loan_items.due_at', '<', $loanedAt)->exists()) {
+            if ((clone $pendingItems)->where('loan_items.due_at', '<', $now)->exists()) {
                 return $this->error('MEMBER_HAS_OVERDUE', 'El socio tiene juegos vencidos sin devolver.', 409);
             }
 
@@ -113,7 +124,7 @@ class LoanController extends Controller
                 'id' => $loanId,
                 'member_id' => $memberId,
                 'loaned_at' => $loanedAt->toIso8601ZuluString(),
-                'status' => LoanStatus::fromItems($items, $loanedAt)->value,
+                'status' => LoanStatus::fromItems($items, $now)->value,
                 'items' => array_map(
                     static fn (array $item): array => array_replace(
                         $item,
@@ -124,7 +135,8 @@ class LoanController extends Controller
             ], 201);
         });
     }
-        public function returnItem(string $loan_id, string $item_id): JsonResponse
+
+    public function returnItem(string $loan_id, string $item_id): JsonResponse
     {
         if (! Str::isUuid($loan_id) || ! Str::isUuid($item_id)) {
             return $this->error('NOT_FOUND', 'La línea de préstamo no existe.', 404);
@@ -171,7 +183,7 @@ class LoanController extends Controller
         });
     }
 
-        public function overdue(): JsonResponse
+    public function overdue(): JsonResponse
     {
         $now = CarbonImmutable::now('UTC')->startOfSecond();
 
@@ -205,7 +217,7 @@ class LoanController extends Controller
         return response()->json(['items' => $items]);
     }
 
-        public function show(string $id): JsonResponse
+    public function show(string $id): JsonResponse
     {
         $loan = Str::isUuid($id)
             ? DB::table('loans')->where('id', $id)->first()
@@ -245,7 +257,7 @@ class LoanController extends Controller
         ]);
     }
 
-        public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $filters = $request->validate([
             'from' => ['sometimes', 'date_format:Y-m-d'],
