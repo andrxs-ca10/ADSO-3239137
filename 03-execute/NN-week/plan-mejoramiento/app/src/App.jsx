@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Catalog from './Catalog.jsx'
+import Members from './Members.jsx'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1'
 
@@ -60,6 +61,7 @@ export default function App() {
         </button>
 
         <Catalog apiBaseUrl={apiBaseUrl} token={session.token} />
+        <Members apiBaseUrl={apiBaseUrl} token={session.token} />
       </main>
     )
   }
