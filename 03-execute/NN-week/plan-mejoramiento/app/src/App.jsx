@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Catalog from './Catalog.jsx'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1'
 
@@ -53,9 +54,12 @@ export default function App() {
         <h1>Ludoteca</h1>
         <p>Bienvenido, {session.username}.</p>
         <p>Rol {session.role === 'admin' ? 'administrador' : 'operador'}.</p>
+
         <button type="button" onClick={() => setSession(null)}>
           Cerrar sesión
         </button>
+
+        <Catalog apiBaseUrl={apiBaseUrl} token={session.token} />
       </main>
     )
   }
