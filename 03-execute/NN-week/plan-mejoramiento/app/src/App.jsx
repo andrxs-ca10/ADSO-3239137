@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Catalog from './Catalog.jsx'
 import Members from './Members.jsx'
+import Loans from './Loans.jsx'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1'
 
@@ -8,6 +9,7 @@ export default function App() {
   const [session, setSession] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [loanRevision, setLoanRevision] = useState(0)
 
   async function handleLogin(event) {
     event.preventDefault()
@@ -60,8 +62,14 @@ export default function App() {
           Cerrar sesión
         </button>
 
-        <Catalog apiBaseUrl={apiBaseUrl} token={session.token} />
+        <Catalog key={loanRevision} apiBaseUrl={apiBaseUrl} token={session.token} />
         <Members apiBaseUrl={apiBaseUrl} token={session.token} />
+        <Loans
+          apiBaseUrl={apiBaseUrl}
+          token={session.token}
+          revision={loanRevision}
+          onCreated={() => setLoanRevision((revision) => revision + 1)}
+        />
       </main>
     )
   }
