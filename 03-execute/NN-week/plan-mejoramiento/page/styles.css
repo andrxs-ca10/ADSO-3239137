@@ -128,11 +128,16 @@ dt {
 }
 
 .navigation a {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0.3rem 0;
 }
 
-.navigation a:hover {
+.navigation a:hover,
+.navigation a:focus-visible {
   text-decoration: underline;
 }
 
