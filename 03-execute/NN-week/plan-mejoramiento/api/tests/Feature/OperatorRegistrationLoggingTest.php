@@ -37,9 +37,11 @@ class OperatorRegistrationLoggingTest extends TestCase
             $databaseError,
         );
 
-        DB::shouldReceive('transaction')
-            ->once()
-            ->andThrow($exception);
+        DB::connection()->beforeExecuting(static function (string $query) use ($exception): void {
+            if (str_starts_with($query, 'insert into "users"')) {
+                throw $exception;
+            }
+        });
 
         Log::shouldReceive('error')
             ->once()
