@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Ludoteca de juegos de mesa. Gestiona el catálogo, los socios, los préstamos y las devoluciones.">
+  <title>Ludoteca | Juegos de mesa</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body id="top">
+  <a class="skip-link" href="#content">Saltar al contenido</a>
+
+  <header class="site-header">
+    <div class="container header-layout">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Ludoteca</a>
+      <nav aria-label="Navegación principal">
+        <ul class="navigation">
+          <li><a href="#features">Funciones</a></li>
+          <li><a href="#loans">Préstamos</a></li>
+          <li><a href="#roles">Roles</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content" tabindex="-1">
+    <section class="container hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">Ludoteca de<br class="title-break"> juegos de mesa</h1>
+        <p>Organiza tu catálogo, registra a tus socios y lleva el control de cada juego desde el préstamo hasta la devolución.</p>
+        <a class="button" href="#features">Conoce la Ludoteca <span aria-hidden="true">↓</span></a>
+      </div>
+
+      <div class="board-scene" aria-hidden="true">
+        <div class="game-board">
+          <span class="piece piece-gold"></span>
+          <span class="piece piece-red"></span>
+          <span class="piece piece-ivory"></span>
+        </div>
+        <div class="playing-card card-back"></div>
+        <div class="playing-card card-front"><span></span></div>
+        <div class="die"><span></span></div>
+      </div>
+    </section>
+
+    <section class="container features" id="features" aria-labelledby="features-title">
+      <h2 id="features-title">Funciones de la ludoteca</h2>
+      <div class="feature-grid">
+        <article class="feature feature-wide">
+          <h3>Catálogo de juegos</h3>
+          <p>Busca por título o diseñador, filtra por categoría y consulta cuántas unidades están disponibles. Cada juego se identifica con su código EAN.</p>
+          <ul class="categories" aria-label="Categorías del catálogo">
+            <li>Estrategia</li>
+            <li>Familiares</li>
+            <li>Cartas</li>
+            <li>Rol</li>
+            <li>Infantiles</li>
+          </ul>
+        </article>
+        <article class="feature">
+          <h3>Registro de socios</h3>
+          <p>Registra a los socios y encuéntralos por su nombre o número de documento al atenderlos.</p>
+        </article>
+        <article class="feature">
+          <h3>Juegos vencidos</h3>
+          <p>Consulta qué juegos siguen pendientes, quién los tiene prestados y cuántos días llevan de atraso.</p>
+        </article>
+        <article class="feature">
+          <h3>Juegos más solicitados</h3>
+          <p>Consulta cuántas veces se prestó cada juego en el periodo que elijas.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="workflow" id="loans" aria-labelledby="loans-title">
+      <div class="container workflow-layout">
+        <div>
+          <h2 id="loans-title">Préstamos y devoluciones</h2>
+          <p class="workflow-intro">Cada socio puede tener hasta cuatro juegos pendientes de devolución. El plazo es de diez días.</p>
+        </div>
+        <ol class="steps">
+          <li><strong>Registra el préstamo.</strong> Selecciona al socio y añade los juegos disponibles. La salida de cada unidad se refleja en el catálogo.</li>
+          <li><strong>Consulta los vencimientos.</strong> Si el socio tiene un juego vencido, debe devolverlo antes de recibir otro préstamo.</li>
+          <li><strong>Registra la devolución.</strong> Cada juego se devuelve por separado y vuelve a quedar disponible. El préstamo se cierra cuando se devuelven todos sus juegos.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="container roles" id="roles" aria-labelledby="roles-title">
+      <h2 id="roles-title">Quién usa la Ludoteca</h2>
+      <dl class="role-grid">
+        <div>
+          <dt>Administrador</dt>
+          <dd>Administra el catálogo, los socios y las cuentas de operadores. Consulta el reporte de juegos más solicitados.</dd>
+        </div>
+        <div>
+          <dt>Operador de ludoteca</dt>
+          <dd>Registra préstamos y devoluciones. Consulta el catálogo, los socios y los juegos vencidos.</dd>
+        </div>
+        <div>
+          <dt>Socio</dt>
+          <dd>Recibe juegos prestados a través del personal de la ludoteca, sin necesidad de iniciar sesión.</dd>
+        </div>
+      </dl>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-layout">
+      <span>Ludoteca de juegos de mesa</span>
+      <a href="#top">Volver al inicio ↑</a>
+    </div>
+  </footer>
+</body>
+</html>
