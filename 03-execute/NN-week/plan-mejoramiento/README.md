@@ -35,4 +35,42 @@ La documentación del proyecto está en [`docs/`](docs/). La implementación deb
 
 ## Ejecución
 
-Las instrucciones de instalación y arranque se completarán cuando esté configurada la carpeta `infra`.
+Ejecuta los comandos desde `plan-mejoramiento` con Docker Desktop iniciado y una terminal PowerShell.
+
+### Configuración inicial
+
+Si ya tienes `api/.env` configurado, pasa a **Arranque**. En una instalación nueva, crea el archivo a partir del ejemplo.
+
+```powershell
+Copy-Item .\api\.env.example .\api\.env
+```
+
+En `api/.env`, define `ADMIN_USERNAME` y `ADMIN_PASSWORD` para la cuenta inicial. Usa una contraseña de al menos ocho caracteres y de hasta 72 bytes. Genera dos valores distintos para `APP_KEY` y `JWT_SECRET` con este bloque y pega las líneas que imprime en sus campos correspondientes.
+
+```powershell
+$random = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+$bytes = New-Object byte[] 32
+$random.GetBytes($bytes)
+"APP_KEY=base64:$([Convert]::ToBase64String($bytes))"
+$random.GetBytes($bytes)
+"JWT_SECRET=$([Convert]::ToBase64String($bytes))"
+$random.Dispose()
+```
+
+### Arranque
+
+```powershell
+docker compose -f .\infra\compose.yaml up -d --build
+```
+
+La API aplica las migraciones al iniciar y crea la cuenta administradora inicial y las categorías. Comprueba que esté lista con [la ruta de salud](http://127.0.0.1:8000/api/v1/health), que devuelve `{"status":"ok"}`.
+
+Abre la [interfaz de operación](http://127.0.0.1:5173/) e inicia sesión con las credenciales del administrador. Para ver el sitio público, abre [`page/index.html`](page/index.html) en el navegador.
+
+### Datos de demostración
+
+Con la API iniciada, ejecuta el sembrador e ingresa las credenciales del administrador cuando las solicite.
+
+```powershell
+.\tool\seed-demo.ps1
+```
