@@ -330,9 +330,18 @@ dt {
   gap: clamp(1.5rem, 5vw, 5rem);
 }
 
-.workflow-intro {
-  max-width: 32ch;
-  margin-top: 1rem;
+.loan-rules {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1.25rem 0 0;
+}
+
+.loan-rules dt {
+  color: #f5c984;
+}
+
+.loan-rules dd {
+  margin: 0.15rem 0 0;
 }
 
 .steps {
