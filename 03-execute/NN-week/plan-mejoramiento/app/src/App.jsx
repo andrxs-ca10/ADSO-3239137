@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Catalog from './Catalog.jsx'
 import Members from './Members.jsx'
 import Loans from './Loans.jsx'
+import OverdueLoans from './OverdueLoans.jsx'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1'
 
@@ -70,6 +71,13 @@ export default function App() {
           revision={loanRevision}
           onCreated={() => setLoanRevision((revision) => revision + 1)}
         />
+
+        <OverdueLoans
+         key={loanRevision}
+         apiBaseUrl={apiBaseUrl}
+          token={session.token}
+        />
+
       </main>
     )
   }
