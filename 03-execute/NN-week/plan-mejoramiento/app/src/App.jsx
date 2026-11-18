@@ -3,6 +3,7 @@ import Catalog from './Catalog.jsx'
 import Members from './Members.jsx'
 import Loans from './Loans.jsx'
 import OverdueLoans from './OverdueLoans.jsx'
+import MostRequestedGames from './MostRequestedGames.jsx'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1'
 
@@ -77,6 +78,10 @@ export default function App() {
          apiBaseUrl={apiBaseUrl}
           token={session.token}
         />
+
+        {session.role === 'admin' && (
+        <MostRequestedGames apiBaseUrl={apiBaseUrl} token={session.token} />
+  )}
 
       </main>
     )
