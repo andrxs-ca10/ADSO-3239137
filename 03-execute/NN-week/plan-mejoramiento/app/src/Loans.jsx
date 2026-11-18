@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import LoanHistory from './LoanHistory.jsx'
 
 const pageSize = 50
 
@@ -34,6 +35,7 @@ async function loadAll(apiBaseUrl, resource, token, signal) {
 
 export default function Loans({ apiBaseUrl, token, revision, onCreated }) {
   const [options, setOptions] = useState(null)
+  const [historyMembers, setHistoryMembers] = useState(null)
   const [loadError, setLoadError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -43,7 +45,10 @@ export default function Loans({ apiBaseUrl, token, revision, onCreated }) {
     const controller = new AbortController()
 
     Promise.all([
-      loadAll(apiBaseUrl, 'members', token, controller.signal),
+      loadAll(apiBaseUrl, 'members', token, controller.signal).then((members) => {
+        if (!controller.signal.aborted) setHistoryMembers(members)
+        return members
+      }),
       loadAll(apiBaseUrl, 'games', token, controller.signal),
     ])
       .then(([members, games]) => {
@@ -161,6 +166,13 @@ export default function Loans({ apiBaseUrl, token, revision, onCreated }) {
           {saveError && <p role="alert">{saveError}</p>}
         </form>
       )}
+
+      <LoanHistory
+        apiBaseUrl={apiBaseUrl}
+        token={token}
+        revision={revision}
+        members={historyMembers ?? (loadError ? [] : null)}
+      />
     </section>
   )
 }
