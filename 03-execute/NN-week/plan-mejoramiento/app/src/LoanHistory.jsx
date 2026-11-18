@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import LoanReturns from './LoanReturns.jsx'
 
 const statusLabels = {
   open: 'Abierto',
@@ -12,11 +13,12 @@ const dateFormat = new Intl.DateTimeFormat('es-CO', {
   timeZone: 'America/Bogota',
 })
 
-export default function LoanHistory({ apiBaseUrl, token, revision, members }) {
+export default function LoanHistory({ apiBaseUrl, token, revision, members, onReturned }) {
   const [status, setStatus] = useState('')
   const [page, setPage] = useState(1)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [selectedLoanId, setSelectedLoanId] = useState(null)
 
   const namesById = new Map(
     (members ?? []).map((member) => [member.id, member.full_name]),
@@ -85,6 +87,7 @@ export default function LoanHistory({ apiBaseUrl, token, revision, members }) {
               <th scope="col">Socio</th>
               <th scope="col">Fecha del préstamo</th>
               <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -96,6 +99,11 @@ export default function LoanHistory({ apiBaseUrl, token, revision, members }) {
                 </td>
                 <td>{dateFormat.format(new Date(loan.loaned_at))}</td>
                 <td>{statusLabels[loan.status] ?? loan.status}</td>
+                <td>
+                  <button type="button" onClick={() => setSelectedLoanId(loan.id)}>
+                    Ver juegos
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -116,6 +124,18 @@ export default function LoanHistory({ apiBaseUrl, token, revision, members }) {
             Siguiente
           </button>
         </nav>
+      )}
+
+      {selectedLoanId && (
+        <LoanReturns
+          key={selectedLoanId}
+          apiBaseUrl={apiBaseUrl}
+          token={token}
+          loanId={selectedLoanId}
+          revision={revision}
+          onReturned={onReturned}
+          onClose={() => setSelectedLoanId(null)}
+        />
       )}
     </section>
   )

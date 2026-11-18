@@ -167,12 +167,13 @@ export default function Loans({ apiBaseUrl, token, revision, onCreated }) {
         </form>
       )}
 
-      <LoanHistory
-        apiBaseUrl={apiBaseUrl}
-        token={token}
-        revision={revision}
-        members={historyMembers ?? (loadError ? [] : null)}
-      />
+     <LoanHistory
+  apiBaseUrl={apiBaseUrl}
+  token={token}
+  revision={revision}
+  members={options?.members ?? historyMembers ?? (loadError ? [] : null)}
+  onReturned={onCreated}
+/>
     </section>
   )
 }
