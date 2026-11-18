@@ -48,6 +48,16 @@ services:
         php artisan config:cache
         php artisan migrate --seed --force
         exec php artisan serve --host=0.0.0.0 --port=8000 --no-reload
+    healthcheck:
+      test:
+        - CMD
+        - php
+        - -r
+        - 'exit((json_decode((string) @file_get_contents("http://127.0.0.1:8000/api/v1/health"), true)["status"] ?? null) === "ok" ? 0 : 1);'
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
 
   web:
     image: node:24
